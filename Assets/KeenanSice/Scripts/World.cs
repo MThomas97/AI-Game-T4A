@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class WorldTile
+public class WorldTile
 {
     //KS - Don't expect to see this colour, but it is bright enough to show there is a problem.
     public Color mColour = Color.magenta;
     public GameObject mTileObject;
 };
 
-class WallTile : WorldTile
+public class WallTile : WorldTile
 {
     public WallTile()
     {
@@ -17,7 +17,7 @@ class WallTile : WorldTile
     }
 };
 
-class WalkableTile : WorldTile
+public class WalkableTile : WorldTile
 {
     public float mSpeedModifier = 1.0f;
 
@@ -29,7 +29,7 @@ class WalkableTile : WorldTile
 
 public class World : MonoBehaviour
 {
-    WorldTile[,] worldTiles;
+    public Dictionary<Vector2Int, WorldTile> worldTiles = new Dictionary<Vector2Int, WorldTile>();
 
     public Vector2Int worldTileDimensions = new Vector2Int(100,100);
 
@@ -57,7 +57,7 @@ public class World : MonoBehaviour
 
     void GenerateWorld()
     {
-        worldTiles = new WorldTile[worldTileDimensions.x, worldTileDimensions.y];
+        worldTiles.Clear();
 
         if(worldGenerationTexture != null)
         {
@@ -117,7 +117,7 @@ public class World : MonoBehaviour
         newTile.mTileObject.transform.SetParent(transform);
         newTile.mTileObject.GetComponent<SpriteRenderer>().color = newTile.mColour;
 
-        worldTiles[x, y] = newTile;
+        worldTiles.Add(new Vector2Int(x,y), newTile);
     }
 
 
@@ -153,10 +153,12 @@ public class World : MonoBehaviour
 
     bool IsPositionWalkable(Vector2Int position)
     {
-        //KS - Check if position is Inside the world
-        if(position.x > 0 && position.x < worldTileDimensions.x && position.y > 0 && position.y < worldTileDimensions.y)
+        WorldTile tile;
+
+        //KS - Dictionary look up for valid position.
+        if (worldTiles.TryGetValue(position, out tile))
         {
-            return (worldTiles[position.x, position.y] is WalkableTile);
+            return (tile is WalkableTile);
         }
 
         return false;
