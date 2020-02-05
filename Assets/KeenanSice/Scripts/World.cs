@@ -151,7 +151,7 @@ public class World : MonoBehaviour
         }
     }
 
-    bool IsPositionWalkable(Vector2Int position)
+    public bool IsPositionWalkable(Vector2Int position)
     {
         WorldTile tile;
 
