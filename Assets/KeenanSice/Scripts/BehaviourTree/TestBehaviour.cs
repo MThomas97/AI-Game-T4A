@@ -1,0 +1,18 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TestBehaviour : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+        BehaviourTree bt = BehaviourTree();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
