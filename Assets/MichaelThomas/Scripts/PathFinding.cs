@@ -2,41 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-struct neighbour
-{
-    int gCost;
-    int hCost;
-    int fCost;
-}
-
 public class PathFinding : MonoBehaviour
 {
     private const int MOVE_STRIAGHT_COST = 10;
     private const int MOVE_DIAGONAL_COST = 14;
 
-    private List<Vector2Int> OPEN = new List<Vector2Int>(); //Nodes to be checked
-    private List<Vector2Int> CLOSED = new List<Vector2Int>(); //Nodes that have already been checked
+	private List<Node> OPEN = new List<Node>(); //Nodes to be checked
+	private List<Node> CLOSED = new List<Node>(); //Nodes that have already been checked
 
-    private int gCost = 0; //Walking cost from start node
-    private int hCost = 0; //Distance cost to reach end node
-    private int fCost = 0; //G + H
-
-    private Vector2Int currentNode;
-    private Vector2Int targetNode;
+	private Node currentNode = new Node(new Vector2Int(5,5));
+	private Node targetNode = new Node (new Vector2Int (9, 5));
 
     private World m_world;
 
     // Start is called before the first frame update
     void Start()
     {
-        currentNode = new Vector2Int(5, 5);
-        targetNode = new Vector2Int(9, 5);
-        hCost = ((targetNode.x - currentNode.x) * 10) + ((targetNode.y - currentNode.y) * 10);
-        print(hCost);
+        //hCost = ((targetNode.pos.x - currentNode.pos.x) * 10) + ((targetNode.pos.y - currentNode.pos.y) * 10);
+        //print(hCost);
         m_world = GetComponent<World>();
         Debug.Log(m_world.worldTiles[new Vector2Int(0,4)].mTileObject.transform.position);
         Debug.Log(m_world.IsPositionWalkable(new Vector2Int(0, 2)));
-        CheckNeighbours();
+		CLOSED.Add (currentNode);
+        GetNeighbours();
     }
 
     // Update is called once per frame
@@ -45,7 +33,7 @@ public class PathFinding : MonoBehaviour
         
     }
 
-    void CheckNeighbours()
+    void GetNeighbours()
     {
         //for (int x = -1; x < 1; x++)
         //{
@@ -56,11 +44,11 @@ public class PathFinding : MonoBehaviour
                 
         //    }
         //}
-        for (int y = currentNode.y - 1; y <= currentNode.y + 1; y++)
+        for (int y = currentNode.pos.y - 1; y <= currentNode.pos.y + 1; y++)
         {
             if (y < -1)
                 return;
-            for (int x = currentNode.x - 1; x <= currentNode.x + 1; x++)
+            for (int x = currentNode.pos.x - 1; x <= currentNode.pos.x + 1; x++)
             {
                 if (!m_world.IsPositionWalkable(new Vector2Int(x,y)))
                     return;
@@ -68,31 +56,43 @@ public class PathFinding : MonoBehaviour
                 if (x < -1)
                     return;
 
-                foreach (Vector2Int inClosedList in CLOSED)
+				foreach (Node inClosedList in CLOSED)
                 {
-                    if(inClosedList.x + inClosedList.y == x+y)
+                    if(inClosedList.pos.x + inClosedList.pos.y == x+y)
                     {
                         Debug.Log("is already in closed list");
                         return;
                     }
                 }
 
-                foreach (Vector2Int inOpenList in OPEN)
+				foreach (Node inOpenList in OPEN)
                 {
-                    if(inOpenList.x + inOpenList.y == x+y)
+                    if(inOpenList.pos.x + inOpenList.pos.y == x+y)
                     {
                         Debug.Log("is already in open list");
                         return;
                     }
                 }
+				Node newNeighbour = new Node(new Vector2Int(x, y));
+				OPEN.Add(newNeighbour);
             }
         }
 
     }
 
+	int GetDistance(Node nodeA, Node nodeB)
+	{
+		int distX = Mathf.Abs (nodeA.pos.x - nodeB.pos.x);
+		int distY = Mathf.Abs (nodeA.pos.y - nodeB.pos.y);
+
+		if (distX > distY)
+			return 14 * distY + 10 * (distX - distY);
+		return 14 * distX + 10 * (distY - distX);
+	}
+
     public void CalculatePath()
     {
-        if (CLOSED.Count == 0)
+		if (currentNode == targetNode)
             return;
 
 

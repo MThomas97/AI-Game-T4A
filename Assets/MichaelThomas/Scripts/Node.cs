@@ -4,6 +4,19 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    private Vector2Int posX;
-    private Vector2Int posY;
+	public Vector2Int pos;
+
+	public int gCost; //Walking cost from start node
+	public int hCost; //Distance cost to reach end node
+
+	public Node(Vector2Int position)
+	{
+		pos = position;
+	}
+
+	public int fCost {
+		get {
+			return gCost + hCost;
+		}
+	}
 }
