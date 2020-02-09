@@ -1,4 +1,4 @@
-﻿#define KSDEBUG
+﻿//#define KSDEBUG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -6,14 +6,14 @@ using UnityEngine;
 
 public class Behaviour
 {
-    protected virtual void Init()
+    public virtual void Init()
     {
 #if KSDEBUG
         Debug.Log("Behaviour Initialised");
 #endif
     }
 
-    protected virtual void Terminate(Status newStatus)
+    public virtual void Terminate(Status newStatus)
     {
 #if KSDEBUG
         Debug.Log("Behaviour Terminated");
@@ -39,7 +39,7 @@ public class Behaviour
         return status;
     }
 
-    protected virtual Status Update()
+    public virtual Status Update()
     {
         return Status.Invalid;
     }
@@ -64,6 +64,7 @@ public class Behaviour
 
     public void Abort()
     {
+        Terminate(Status.Aborted);
         status = Status.Aborted;
     }
 

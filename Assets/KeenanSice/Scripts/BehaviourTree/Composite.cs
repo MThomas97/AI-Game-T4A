@@ -4,9 +4,19 @@ using UnityEngine;
 
 public class Composite : Behaviour
 {
+    protected List<Behaviour> children = new List<Behaviour>();
+
+    public Composite(params Behaviour[] newChildren)
+    {
+        for (int i = 0; i < newChildren.Length; i++)
+        {
+            AddChild(newChildren[i]);
+        }
+    }
+
     public void AddChild(Behaviour behaviour)
     {
-        children.Insert(0, behaviour);
+        children.Add(behaviour);
     }
 
     public void RemoveChild(Behaviour behaviour)
@@ -18,6 +28,4 @@ public class Composite : Behaviour
     {
         children.Clear();
     }
-
-    protected List<Behaviour> children;
 }

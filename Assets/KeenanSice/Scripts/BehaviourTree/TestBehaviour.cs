@@ -4,15 +4,50 @@ using UnityEngine;
 
 public class TestBehaviour : MonoBehaviour
 {
-    // Start is called before the first frame update
+    BehaviourTree bt = new BehaviourTree();
+
     void Start()
     {
-        BehaviourTree bt = BehaviourTree();
+        Sequence sequence = new Sequence(
+            new DebugBehaviour("Test", Status.Success),
+            new DebugBehaviour("Snore", Status.Success),
+            new DebugBehaviour("Woah were working", Status.Failure),
+            new DebugBehaviour(":C", Status.Success)
+            );
+
+        bt.AddRoot(sequence);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        bt.Tick();
+    }
+}
+
+
+
+public class DebugBehaviour : Behaviour
+{
+    protected string debugMessage;
+    protected Status returnStatus;
+
+    public DebugBehaviour(string newDebugMessage, Status newReturnStatus)
+    {
+        debugMessage = newDebugMessage;
+        returnStatus = newReturnStatus;
+    }
+
+    public DebugBehaviour()
+    {
+        debugMessage = "Nil";
+        returnStatus = Status.Failure;
+    }
+
+
+    public override Status Update()
+    {
+        Debug.Log(debugMessage);
+
+        return returnStatus;
     }
 }

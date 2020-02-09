@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ActiveSelector : Selector
 {
+    public ActiveSelector(params Behaviour[] newChildren) : base(newChildren) { }
+
     public void AddCondition(Behaviour condition)
     {
         children.Insert(0, condition);
@@ -14,19 +16,15 @@ public class ActiveSelector : Selector
         children.Add(action);
     }
 
-    protected override Status Update()
+    public override Status Update()
     {
         List<Behaviour>.Enumerator prevChild = currentChild;
-
-        //KS - Don't really like this, need to come back and rethink
-        List<Behaviour>.Enumerator nextChild = currentChild;
-        bool isCurrentLast = nextChild.MoveNext();
 
         base.Init();
 
         Status result = base.Update();
 
-        if(!isCurrentLast && currentChild.Current != prevChild.Current)
+        if(currentChild.Current != children[children.Count-1] && currentChild.Current != prevChild.Current)
         {
             prevChild.Current.Abort();
         }

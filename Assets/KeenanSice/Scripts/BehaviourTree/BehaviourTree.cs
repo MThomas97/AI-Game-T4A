@@ -8,6 +8,12 @@ public class BehaviourTree
 
     public void Tick()
     {
-
+        root.Tick();
     }
+
+    public void AddRoot(Behaviour newRoot)
+    {
+        root = newRoot;
+    }
+
 }

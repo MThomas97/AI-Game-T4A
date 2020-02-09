@@ -9,7 +9,7 @@ public class Repeat : Decorator
     protected int counter = 0;
     protected int counterLimit;
 
-    protected override Status Update()
+    public override Status Update()
     {
         while (true)
         {

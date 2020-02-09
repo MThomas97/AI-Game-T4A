@@ -19,7 +19,7 @@ public class Parallel : Composite
     }
 
 
-    protected override Status Update()
+    public override Status Update()
     {
         int successCount = 0, failureCount = 0;
 
@@ -64,7 +64,7 @@ public class Parallel : Composite
         return Status.Running;
     }
 
-    protected override void Terminate(Status newStatus)
+    public override void Terminate(Status newStatus)
     {
         foreach(Behaviour child in children)
         {
