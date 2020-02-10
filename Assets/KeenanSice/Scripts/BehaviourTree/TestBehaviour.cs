@@ -4,27 +4,35 @@ using UnityEngine;
 
 public class TestBehaviour : MonoBehaviour
 {
-    BehaviourTree bt = new BehaviourTree();
+    BehaviourTree bt;
 
     void Start()
     {
-        Sequence sequence = new Sequence(
-            new DebugBehaviour("Test", Status.Success),
-            new DebugBehaviour("Snore", Status.Success),
-            new DebugBehaviour("Woah were working", Status.Failure),
-            new DebugBehaviour(":C", Status.Success)
-            );
-
-        bt.AddRoot(sequence);
+        bt = new BehaviourTree(
+            new Sequence(
+                new DebugBehaviour("Test", Status.Success),
+                new Condition(TestFunc,
+                    new DebugBehaviour("We passed!", Status.Success),
+                    new DebugBehaviour("We failed :C", Status.Failure)
+                ),
+                new DebugBehaviour("Snore", Status.Success),
+                new DebugBehaviour("Woah were working", Status.Failure),
+                new DebugBehaviour(":C", Status.Success)
+            )
+        );
     }
 
     void Update()
     {
         bt.Tick();
     }
+
+    bool TestFunc()
+    {
+        return false;
+    }
+
 }
-
-
 
 public class DebugBehaviour : Behaviour
 {

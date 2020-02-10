@@ -6,12 +6,14 @@ public class BehaviourTree
 {
     protected Behaviour root;
 
+    public BehaviourTree(Behaviour newRoot) => root = newRoot;
+
     public void Tick()
     {
         root.Tick();
     }
 
-    public void AddRoot(Behaviour newRoot)
+    public void SetRoot(Behaviour newRoot)
     {
         root = newRoot;
     }
