@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PathFinding : MonoBehaviour
 {
-	public Transform seeker, target;
+    private Transform seeker;
+    public Transform target;
 
     public int MOVE_STRIAGHT_COST = 10;
     public int MOVE_DIAGONAL_COST = 20;
@@ -16,14 +17,17 @@ public class PathFinding : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_world = GetComponent<World>();
-		CalculatePath(new Vector2Int(38, 12), new Vector2Int(82, 26));
+        m_world = FindObjectOfType<World>();
+        seeker = transform;
     }
 
     // Update is called once per frame
     void Update()
     {
-		CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
+        if (target != null)
+        {
+            CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
+        }
     }
 
 	List<Node> GetNeighbours(Node currentNode)

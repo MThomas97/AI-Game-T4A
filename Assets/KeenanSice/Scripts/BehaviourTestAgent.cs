@@ -57,6 +57,7 @@ public class BehaviourTestAgent : MonoBehaviour
 
     void MoveForward()
     {
+        return;
         transform.localPosition += transform.right * Time.deltaTime;
     }
 }
