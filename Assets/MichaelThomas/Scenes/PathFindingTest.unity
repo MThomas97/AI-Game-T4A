@@ -130,7 +130,6 @@ GameObject:
   m_Component:
   - component: {fileID: 89503318}
   - component: {fileID: 89503317}
-  - component: {fileID: 89503319}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -169,24 +168,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &89503319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 89503316}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b5e8b2cb976bb642894e45d80bbf66f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  seeker: {fileID: 1735330876}
-  target: {fileID: 1527754177}
-  MOVE_STRIAGHT_COST: 10
-  MOVE_DIAGONAL_COST: 12
-  DebugCorners: 1
-  gizmoPath: []
 --- !u!1 &664723221
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,6 +354,8 @@ GameObject:
   - component: {fileID: 1735330875}
   - component: {fileID: 1735330874}
   - component: {fileID: 1735330873}
+  - component: {fileID: 1735330878}
+  - component: {fileID: 1735330877}
   m_Layer: 0
   m_Name: Seeker
   m_TagString: Untagged
@@ -452,3 +435,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1735330877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735330872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 116ac7a44f841904d80ac6ad2e8eb2ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1735330878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735330872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5e8b2cb976bb642894e45d80bbf66f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1527754177}
+  MOVE_STRIAGHT_COST: 10
+  MOVE_DIAGONAL_COST: 20
+  DebugCorners: 1

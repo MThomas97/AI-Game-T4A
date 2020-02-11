@@ -8,11 +8,11 @@ public class PathFinding : MonoBehaviour
     public Transform target;
 
     public int MOVE_STRIAGHT_COST = 10;
-    public int MOVE_DIAGONAL_COST = 20;
+    public int MOVE_DIAGONAL_COST = 12;
 
     private World m_world;
 
-	public bool DebugCorners = false;
+	public bool DebugCorners = true;
 
     public Node calculatedPathStartNode = null;
 
@@ -87,9 +87,11 @@ public class PathFinding : MonoBehaviour
 	}
 
     public void CalculatePath(Vector2Int startPos, Vector2Int targetPos)
-	{
+	{ //Need to fix path so it finds the optimal route and not going towards the target when there is wall in the way
+		//rewrite to discard node that end up not being the optimal route
 		if (!m_world.IsPositionWalkable(targetPos) || !m_world.IsPositionWalkable(startPos))
 		{
+			calculatedPathStartNode = null;
 			Debug.Log("Target is out of bounds.");
 			return;
 		}
