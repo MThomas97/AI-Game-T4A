@@ -10,18 +10,27 @@ public class BehaviourTestAgent : MonoBehaviour
     {
         bt = new BehaviourTree(
             new Sequence(
-                new Condition(CanMoveForward, 
-                    new KSAction(MoveForward),
-                    new KSAction(RotateLeft)
+                new KSAction(SetTargetToClosestAmmoTile),
+                new Condition(HasReachedTarget,
+                    new KSAction(RotateLeft),
+                    new Condition(IsFacingTarget,
+                        new KSAction(MoveForward),
+                        new KSAction(RotateTowards)
+                    )
                 )
             )
         );
     }
 
-    // Start is called before the first frame update
+    World world;
+    Vector3 targetPosition;
+
+
     void Start()
     {
         SetupBehaviour();
+
+        world = FindObjectOfType<World>();
     }
 
     // Update is called once per frame
@@ -54,6 +63,46 @@ public class BehaviourTestAgent : MonoBehaviour
         return false;
     }
 
+    bool HasReachedTarget()
+    {
+        return transform.position == targetPosition;
+    }
+
+    void SetTargetToClosestAmmoTile()
+    {
+        if (world.ammoTiles.Count > 0)
+        {
+            Vector3 closestTilePosition = world.ammoTiles[0].mTileObject.transform.position;
+            float distance = Vector3.Distance(transform.position, closestTilePosition);
+
+            for(int i = 1; i < world.ammoTiles.Count; i++)
+            {
+                float dist = Vector3.Distance(transform.position, world.ammoTiles[i].mTileObject.transform.position);
+
+                if(dist < distance)
+                {
+                    closestTilePosition = world.ammoTiles[i].mTileObject.transform.position;
+                    distance = dist;
+                }
+            }
+
+            targetPosition = closestTilePosition;
+        }
+    }
+
+    bool IsFacingTarget()
+    {
+        Vector3 targetDirection = Vector3.Normalize(targetPosition - transform.position);
+        return transform.right == targetDirection;
+    }
+
+    void RotateTowards()
+    {
+        Vector3 targetDirection = targetPosition - transform.position;
+        float angle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
+        Quaternion quart = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.Slerp(transform.rotation, quart, Time.deltaTime * 2);
+    }
 
     void MoveForward()
     {
