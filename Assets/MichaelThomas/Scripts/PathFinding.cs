@@ -14,6 +14,8 @@ public class PathFinding : MonoBehaviour
 
 	public bool DebugCorners = false;
 
+    public Node calculatedPathStartNode = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -149,39 +151,45 @@ public class PathFinding : MonoBehaviour
 
 	void OnDrawGizmos()
 	{
-		Gizmos.color = Color.red;
+        Gizmos.color = Color.red;
 
-		for(int i = 0; i < gizmoPath.Count; i++)
-		{	
-			Gizmos.DrawWireCube(gizmoPath[i], new Vector3(1.0f, 1.0f));
+        if(calculatedPathStartNode != null)
+        {
+            Node currentNode = calculatedPathStartNode;
 
-			if(i+1 < gizmoPath.Count)
-			{
-				Gizmos.DrawLine(gizmoPath[i], gizmoPath[i+1]);
-			}
-		}
+            while (currentNode != null)
+            {
+                Vector3 currentPos = new Vector3(currentNode.pos.x, currentNode.pos.y, 0);
+
+                Gizmos.DrawWireCube(currentPos, new Vector3(1.0f, 1.0f));
+
+                if(currentNode.parent != null)
+                {
+                    Gizmos.DrawLine(currentPos, new Vector3(currentNode.parent.pos.x, currentNode.parent.pos.y, 0));
+                }
+
+                currentNode = currentNode.parent;
+            }
+        }
 	}
-
-	public List<Vector3> gizmoPath = new List<Vector3>();
 
 	void RetracePath(Node startNode, Node targetNode)
 	{
-		gizmoPath.Clear();
-
-		List<Node> path = new List<Node>();
+        Node previousNode = null;
 		Node currentNode = targetNode;
 
 		while(currentNode != startNode)
 		{
 			Vector3 pos = new Vector3(currentNode.pos.x, currentNode.pos.y, 0);
-			gizmoPath.Add(pos);
 
-			path.Add(currentNode);
-			currentNode = currentNode.parent;
+            Node nextNode = currentNode.parent;
+
+            currentNode.parent = previousNode;
+            previousNode = currentNode;
+            currentNode = nextNode;
 		}
 
-		path.Add(startNode);
-
-		path.Reverse();
+        currentNode.parent = previousNode;
+        calculatedPathStartNode = currentNode;
 	}
 }

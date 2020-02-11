@@ -27,6 +27,31 @@ public class WalkableTile : WorldTile
     }
 };
 
+public class HealthTile : WalkableTile
+{
+    public HealthTile()
+    {
+        mColour = Color.red;
+    }
+}
+
+public class AmmoTile : WalkableTile
+{
+    public AmmoTile()
+    {
+        mColour = Color.blue;
+    }
+}
+
+public class SpawnpointTile : WalkableTile
+{
+    public SpawnpointTile()
+    {
+        mColour = Color.green;
+    }
+}
+
+
 public class World : MonoBehaviour
 {
     public Dictionary<Vector2Int, WorldTile> worldTiles = new Dictionary<Vector2Int, WorldTile>();
@@ -40,6 +65,10 @@ public class World : MonoBehaviour
     public int perlinSeed = -1;
 
     public GameObject baseTileObject;
+
+    public List<SpawnpointTile> spawnpointTiles = new List<SpawnpointTile>();
+    public List<HealthTile> healthTiles = new List<HealthTile>();
+    public List<AmmoTile> ammoTiles = new List<AmmoTile>();
 
     void Start()
     {
@@ -137,13 +166,28 @@ public class World : MonoBehaviour
 
                 WorldTile newTile = new WorldTile();
 
-                if(colourForTile.r > 0.5f)
+                if (colourForTile == Color.black)
+                {
+                    newTile = new WalkableTile();
+                }
+                else if(colourForTile == Color.white)
                 {
                     newTile = new WallTile();
                 }
-                else if(colourForTile.r > -0.1f)
+                else if (colourForTile == Color.red)
                 {
-                    newTile = new WalkableTile();
+                    newTile = new HealthTile();
+                    healthTiles.Add(newTile as HealthTile);
+                }
+                else if (colourForTile == Color.blue)
+                {
+                    newTile = new AmmoTile();
+                    ammoTiles.Add(newTile as AmmoTile);
+                }
+                else if (colourForTile == Color.green)
+                {
+                    newTile = new SpawnpointTile();
+                    spawnpointTiles.Add(newTile as SpawnpointTile);
                 }
 
                 SetupTile(newTile, x, y);

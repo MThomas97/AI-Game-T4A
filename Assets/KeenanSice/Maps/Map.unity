@@ -232,8 +232,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dcc2db03d882954fbd931a0d214b776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldTileDimensions: {x: 10, y: 10}
-  worldGenerationTexture: {fileID: 2800000, guid: 39ae297d6eb76314c855d36c4db5cb1c,
+  worldTileDimensions: {x: 32, y: 32}
+  worldGenerationTexture: {fileID: 2800000, guid: c2dc15228b289fd47ab7410abe9959e4,
     type: 3}
   perlinSeed: -1
   baseTileObject: {fileID: 5733350643558169301, guid: a9a1d427ac071b7478b75a5c737d0cc1,
@@ -263,6 +263,7 @@ GameObject:
   - component: {fileID: 1523203973}
   - component: {fileID: 1523203972}
   - component: {fileID: 1523203974}
+  - component: {fileID: 1523203975}
   m_Layer: 0
   m_Name: New Sprite
   m_TagString: Untagged
@@ -326,7 +327,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1523203971}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5, y: 5, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -344,3 +345,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 116ac7a44f841904d80ac6ad2e8eb2ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1523203975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1523203971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5e8b2cb976bb642894e45d80bbf66f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  MOVE_STRIAGHT_COST: 10
+  MOVE_DIAGONAL_COST: 12
+  DebugCorners: 1
