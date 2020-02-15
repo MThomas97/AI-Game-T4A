@@ -18,7 +18,7 @@ public class AgentBehaviourTree : MonoBehaviour
                             new KSAction(RotateTowards)             //False -   Rotate towards our target.
                         )
                     ),
-                    new KSAction(DoNothing)                 //False -   Do do anything.
+                    new KSAction(RotateAround)              //False -   Do do anything.
                 )
             )
         );
@@ -90,6 +90,11 @@ public class AgentBehaviourTree : MonoBehaviour
         float angle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
         Quaternion quart = Quaternion.AngleAxis(angle, Vector3.forward);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, quart, Time.deltaTime * agentController.rotationSpeed);
+    }
+
+    void RotateAround()
+    {
+        transform.Rotate(Vector3.forward, Time.deltaTime * agentController.rotationSpeed);
     }
 
     void MoveForward()
