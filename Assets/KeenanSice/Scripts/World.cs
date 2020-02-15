@@ -54,9 +54,11 @@ public class SpawnpointTile : WalkableTile
 
 public class World : MonoBehaviour
 {
-    public Dictionary<Vector2Int, WorldTile> worldTiles = new Dictionary<Vector2Int, WorldTile>();
+    public static Color[] playerColours = { Color.red, Color.green, Color.blue, Color.magenta, Color.yellow, Color.cyan };
 
-    public Vector2Int worldTileDimensions = new Vector2Int(100,100);
+    public static Dictionary<Vector2Int, WorldTile> worldTiles = new Dictionary<Vector2Int, WorldTile>();
+
+    public Vector2Int worldTileDimensions = new Vector2Int(32,32);
 
     //KS - Optional, will generate using perlin if not specified.
     public Texture2D worldGenerationTexture;
@@ -64,16 +66,52 @@ public class World : MonoBehaviour
     //KS - Optional, leave as -1 if random is wanted.
     public int perlinSeed = -1;
 
-    public GameObject baseTileObject;
+    //KS - Defaulting to 1 till it's ready.
+    public int totalAgentsOnATeam = 1;
 
-    public List<SpawnpointTile> spawnpointTiles = new List<SpawnpointTile>();
-    public List<HealthTile> healthTiles = new List<HealthTile>();
-    public List<AmmoTile> ammoTiles = new List<AmmoTile>();
+    public GameObject baseTileObject;
+    public GameObject baseAgentObject;
+
+    public static List<SpawnpointTile> spawnpointTiles = new List<SpawnpointTile>();
+    public static List<HealthTile> healthTiles = new List<HealthTile>();
+    public static List<AmmoTile> ammoTiles = new List<AmmoTile>();
+    public static List<AgentController> agents = new List<AgentController>(); 
 
     void Start()
     {
         GenerateWorld();
         SetupCamera();
+        SetupAgents();
+    }
+
+    void SetupAgents()
+    {
+        Vector3 worldCenterPosition = new Vector3(worldTileDimensions.x, worldTileDimensions.y, 0) * 0.5f;
+
+        float teamSpawnOffset = totalAgentsOnATeam * 0.5f;
+
+        for (int x = 0; x < totalAgentsOnATeam; x++)
+        {
+            for (int i = 0; i < spawnpointTiles.Count; i++)
+            {
+                //KS - Don't spawn any more agents if we don't have the colours setup for it.
+                if (i < playerColours.Length)
+                {
+                    GameObject agent = Instantiate(baseAgentObject);
+                    agent.transform.position = spawnpointTiles[i].mTileObject.transform.position;
+
+                    //KS - Make face center.
+                    Vector3 centerLookDirection = Vector3.Normalize(worldCenterPosition - agent.transform.position);
+                    float angle = Mathf.Atan2(centerLookDirection.y, centerLookDirection.x) * Mathf.Rad2Deg;
+                    Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
+                    agent.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+                    agent.GetComponent<SpriteRenderer>().color = playerColours[i];
+                    agent.GetComponent<AgentController>().teamNumber = i;
+                    agents.Add(agent.GetComponent<AgentController>());
+                }
+            }
+        }
     }
 
 
@@ -102,7 +140,7 @@ public class World : MonoBehaviour
 
     void GenerateWorldFromPerlin()
     {
-        if(perlinSeed > -1)
+        if (perlinSeed > -1)
         {
             Random.InitState(perlinSeed);
         }
@@ -141,10 +179,19 @@ public class World : MonoBehaviour
 
     void SetupTile(WorldTile newTile, int x, int y)
     {
-        newTile.mTileObject = Instantiate(baseTileObject);
-        newTile.mTileObject.transform.position = new Vector3(x, y);
-        newTile.mTileObject.transform.SetParent(transform);
-        newTile.mTileObject.GetComponent<SpriteRenderer>().color = newTile.mColour;
+        //KS - Quick optimisation, walkable tiles are black they don't need an actual GameObject.
+        if (newTile.GetType() != typeof(WalkableTile))
+        {
+            newTile.mTileObject = Instantiate(baseTileObject);
+            newTile.mTileObject.transform.position = new Vector3(x, y);
+            newTile.mTileObject.transform.SetParent(transform);
+            newTile.mTileObject.GetComponent<SpriteRenderer>().color = newTile.mColour;
+        }
+
+        if(newTile is WallTile)
+        {
+            newTile.mTileObject.AddComponent<BoxCollider2D>();
+        }
 
         worldTiles.Add(new Vector2Int(x,y), newTile);
     }
@@ -195,7 +242,7 @@ public class World : MonoBehaviour
         }
     }
 
-    public bool IsPositionWalkable(Vector2Int position)
+    public static bool IsPositionWalkable(Vector2Int position)
     {
         WorldTile tile;
 

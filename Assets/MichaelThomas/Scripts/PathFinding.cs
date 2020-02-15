@@ -10,8 +10,6 @@ public class PathFinding : MonoBehaviour
     public int MOVE_STRIAGHT_COST = 10;
     public int MOVE_DIAGONAL_COST = 12;
 
-    private World m_world;
-
 	public bool DebugCorners = true;
 
     public Node calculatedPathStartNode = null;
@@ -19,7 +17,6 @@ public class PathFinding : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_world = FindObjectOfType<World>();
         seeker = transform;
     }
 
@@ -40,7 +37,7 @@ public class PathFinding : MonoBehaviour
         {	
             for (int x = -1; x < 2; x++)
             {
-				if (!m_world.IsPositionWalkable(new Vector2Int (x + currentNode.pos.x, y + currentNode.pos.y)))
+				if (!World.IsPositionWalkable(new Vector2Int (x + currentNode.pos.x, y + currentNode.pos.y)))
 					continue;
 				if(x == 0 && y == 0)
 					continue;
@@ -55,14 +52,14 @@ public class PathFinding : MonoBehaviour
 					{
 						if(v == 0) continue;
 
-						if(!m_world.IsPositionWalkable(newNeighbour.pos + new Vector2Int(0, v))) adjacentWall = true;
+						if(!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(0, v))) adjacentWall = true;
 					}
 
 					for(int h = -1; h < 2; h++)
 					{
 						if(h == 0) continue;
 
-						if(!m_world.IsPositionWalkable(newNeighbour.pos + new Vector2Int(h, 0))) adjacentWall = true;
+						if(!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(h, 0))) adjacentWall = true;
 					}
 
 					if(!adjacentWall) neighbours.Add(newNeighbour);
@@ -89,7 +86,7 @@ public class PathFinding : MonoBehaviour
     public void CalculatePath(Vector2Int startPos, Vector2Int targetPos)
 	{ //Need to fix path so it finds the optimal route and not going towards the target when there is wall in the way
 		//rewrite to discard node that end up not being the optimal route
-		if (!m_world.IsPositionWalkable(targetPos) || !m_world.IsPositionWalkable(startPos))
+		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
 		{
 			calculatedPathStartNode = null;
 			Debug.Log("Target is out of bounds.");

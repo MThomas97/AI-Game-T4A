@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Agent : MonoBehaviour
+[RequireComponent(typeof(PathFinding))]
+[RequireComponent(typeof(AgentBehaviourTree))]
+
+public class AgentController : MonoBehaviour
 {
     int ammoCount = 30;
     int health = 100;
+
+    public float rotationSpeed = 80.0f;
+    public int teamNumber = -1;
+    public float fieldOfView = 90.0f;
+
 
     struct AgentPositionPreviouslySeen
     {
         Vector3 agentPosition;
         float timeSawAt;
     }
-
-
 
     public bool HasAmmo()
     {
@@ -23,12 +29,6 @@ public class Agent : MonoBehaviour
     public int GetHealth()
     {
         return health; 
-    }
-
-    public List<Agent> GetAgentsInSight()
-    {
-        //CHECK FOR AGENTS
-        return new List<Agent>();
     }
 
     // Start is called before the first frame update
