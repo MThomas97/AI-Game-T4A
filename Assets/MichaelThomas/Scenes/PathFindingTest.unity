@@ -151,9 +151,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldTileDimensions: {x: 100, y: 100}
   worldGenerationTexture: {fileID: 0}
-  perlinSeed: -1
+  perlinSeed: 4
+  totalAgentsOnATeam: 1
   baseTileObject: {fileID: 5733350643558169301, guid: a9a1d427ac071b7478b75a5c737d0cc1,
     type: 3}
+  baseAgentObject: {fileID: 0}
 --- !u!4 &89503318
 Transform:
   m_ObjectHideFlags: 0
@@ -429,7 +431,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1735330872}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 57.967407, y: 10.39, z: 0}
+  m_LocalPosition: {x: 85.21, y: 21.68, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -461,5 +463,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1527754177}
   MOVE_STRIAGHT_COST: 10
-  MOVE_DIAGONAL_COST: 20
+  MOVE_DIAGONAL_COST: 100
   DebugCorners: 1

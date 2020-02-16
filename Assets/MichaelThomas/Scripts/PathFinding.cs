@@ -7,8 +7,8 @@ public class PathFinding : MonoBehaviour
     private Transform seeker;
     public Transform target;
 
-    public int MOVE_STRIAGHT_COST = 10;
-    public int MOVE_DIAGONAL_COST = 12;
+    private static int MOVE_STRIAGHT_COST = 10;
+    private static int MOVE_DIAGONAL_COST = 20;
 
 	public bool DebugCorners = true;
 
@@ -18,16 +18,16 @@ public class PathFinding : MonoBehaviour
     void Start()
     {
         seeker = transform;
-    }
+	}
 
     // Update is called once per frame
     void Update()
     {
-        if (target != null)
-        {
-            CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
-        }
-    }
+		if (target != null)
+		{
+			CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
+		}
+	}
 
 	List<Node> GetNeighbours(Node currentNode)
     {
@@ -99,8 +99,6 @@ public class PathFinding : MonoBehaviour
 
 		OPEN.Add(startNode.pos, startNode);
 
-		float start_elapsedTime = Time.time;
-
 		while (OPEN.Count > 0) 
 		{
 			Dictionary<Vector2Int, Node>.Enumerator currNode = OPEN.GetEnumerator();
@@ -109,7 +107,7 @@ public class PathFinding : MonoBehaviour
 			Node currentNode = currNode.Current.Value;
 			while(currNode.MoveNext())
 			{
-				if (currNode.Current.Value.fCost < currentNode.fCost || currNode.Current.Value.fCost == currentNode.fCost && currNode.Current.Value.hCost < currentNode.hCost) 
+				if (currNode.Current.Value.fCost < currentNode.fCost || currNode.Current.Value.fCost == currentNode.fCost && currNode.Current.Value.gCost < currentNode.gCost) 
 				{
 					currentNode = currNode.Current.Value;
 				}
@@ -121,7 +119,6 @@ public class PathFinding : MonoBehaviour
 			if (currentNode.pos == targetNode.pos) 
 			{
 				RetracePath(startNode, currentNode);
-				Debug.Log("A* Time taken to run " + (Time.time - start_elapsedTime));
 				OPEN.Clear();
 				CLOSED.Clear();
 				return;
@@ -131,14 +128,18 @@ public class PathFinding : MonoBehaviour
 			{
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
-				neighbour.gCost = GetDistance (neighbour, startNode);
-				neighbour.hCost = GetDistance(neighbour, targetNode);
-
-				if (!OPEN.ContainsKey(neighbour.pos)) 
+				neighbour.gCost = GetDistance(neighbour, startNode);
+				
+				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+				if (newMovementCostToNeighbour < neighbour.gCost || !OPEN.ContainsKey(neighbour.pos)) 
 				{
+					neighbour.gCost = newMovementCostToNeighbour;
+					neighbour.hCost = GetDistance(neighbour, targetNode);
 					neighbour.parent = currentNode;
-					OPEN.Add(neighbour.pos, neighbour);
 				}
+
+				if (!OPEN.ContainsKey(neighbour.pos))
+					OPEN.Add(neighbour.pos, neighbour);
 			}
 		}
 
@@ -168,7 +169,7 @@ public class PathFinding : MonoBehaviour
                 }
 
                 currentNode = currentNode.parent;
-            }
+			}
         }
 	}
 
