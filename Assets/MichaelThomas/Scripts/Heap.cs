@@ -37,6 +37,11 @@ public class Heap<T> where T : IHeapItem<T>
         SortUp(item);
     }
 
+    public bool Contains(T item)
+    {
+        return Equals(items[item.HeapIndex], item);
+    }
+
     public int Count
     {
         get
