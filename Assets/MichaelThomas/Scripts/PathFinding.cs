@@ -75,10 +75,10 @@ public class PathFinding : MonoBehaviour
 		return neighbours;
     }
 
-	public int GetDistance(Node nodeA, Node nodeB)
+	public int GetDistance(Vector2Int nodeA, Vector2Int nodeB)
 	{
-		int distX = Mathf.Abs(nodeA.pos.x - nodeB.pos.x);
-		int distY = Mathf.Abs(nodeA.pos.y - nodeB.pos.y);
+		int distX = Mathf.Abs(nodeA.x - nodeB.x);
+		int distY = Mathf.Abs(nodeA.y - nodeB.y);
 
 		if (distX > distY)
 			return MOVE_DIAGONAL_COST * distY + MOVE_STRIAGHT_COST * (distX - distY);
@@ -145,15 +145,15 @@ public class PathFinding : MonoBehaviour
 
 			foreach (Node neighbour in GetNeighbours(currentNode)) 
 			{
-				if (CLOSED.ContainsKey(neighbour.pos) || !World.IsPositionWalkable(neighbour.pos))
+				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
-				neighbour.gCost = GetDistance(neighbour, startNode);
+				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
 				
-				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
 				if (newMovementCostToNeighbour < neighbour.gCost || !OPEN.ContainsKey(neighbour.pos)) 
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
-					neighbour.hCost = GetDistance(neighbour, targetNode);
+					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
 				}
 
@@ -194,7 +194,8 @@ public class PathFinding : MonoBehaviour
 		while (OPEN.Count > 0)
 		{
 			Node currentNode = OPEN.RemoveFirst();
-			CLOSED.Add(currentNode.pos, currentNode);
+			if(!CLOSED.ContainsKey(currentNode.pos))
+				CLOSED.Add(currentNode.pos, currentNode);
 
 			if (currentNode.pos == targetNode.pos)
 			{
@@ -211,13 +212,13 @@ public class PathFinding : MonoBehaviour
 			{
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
-				neighbour.gCost = GetDistance(neighbour, startNode);
-				neighbour.hCost = GetDistance(neighbour, targetNode);
-				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
+				neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
+				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
 				if (newMovementCostToNeighbour < neighbour.gCost || !ContainsOPEN.ContainsKey(neighbour.pos))
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
-					neighbour.hCost = GetDistance(neighbour, targetNode);
+					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
 				}
 
