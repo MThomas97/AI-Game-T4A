@@ -95,9 +95,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  MOVE_STRIAGHT_COST: 10
-  MOVE_DIAGONAL_COST: 12
   DebugCorners: 1
+  ToggleHeapOptimisation: 1
 --- !u!114 &4616702162236567788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,6 +112,7 @@ MonoBehaviour:
   rotationSpeed: 80
   teamNumber: -1
   fieldOfView: 90
+  attackRange: 10
 --- !u!114 &4616702162236567699
 MonoBehaviour:
   m_ObjectHideFlags: 0

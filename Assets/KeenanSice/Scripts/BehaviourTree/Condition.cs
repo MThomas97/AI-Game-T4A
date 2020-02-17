@@ -21,12 +21,12 @@ public class Condition : Behaviour
         if (conditionMethod())
         {
             successBehaviour.Tick();
-            return Status.Success;
         }
         else
         {
             failureBehaviour.Tick();
-            return Status.Failure;
         }
+
+        return Status.Success;
     }
 }

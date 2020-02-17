@@ -7,13 +7,13 @@ using UnityEngine;
 
 public class AgentController : MonoBehaviour
 {
-    int ammoCount = 30;
+    public int ammoCount = 30;
     int health = 100;
 
     public float rotationSpeed = 80.0f;
     public int teamNumber = -1;
     public float fieldOfView = 90.0f;
-
+    public float attackRange = 20.0f;
 
     struct AgentPositionPreviouslySeen
     {

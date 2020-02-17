@@ -197,6 +197,10 @@ public class World : MonoBehaviour
         {
             newTile.mTileObject.AddComponent<BoxCollider2D>();
         }
+        else if(newTile is AmmoTile)
+        {
+            newTile.mTileObject.layer = 8; //No Range Layer.
+        }
 
         worldTiles.Add(new Vector2Int(x,y), newTile);
     }
