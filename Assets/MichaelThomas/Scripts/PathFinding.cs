@@ -111,6 +111,7 @@ public class PathFinding : MonoBehaviour
 
 		Dictionary<Vector2Int, Node> OPEN = new Dictionary<Vector2Int, Node>();
 		Dictionary<Vector2Int, Node> CLOSED = new Dictionary<Vector2Int, Node>();
+		Dictionary<Vector2Int, Node> Operations = new Dictionary<Vector2Int, Node>();
 
 		OPEN.Add(startNode.pos, startNode);
 
@@ -135,6 +136,7 @@ public class PathFinding : MonoBehaviour
 			{
 				sw.Stop();
 				print(("Unoptimised Path: " + sw.ElapsedMilliseconds + "ms"));
+				print("Operations: " + Operations.Count);
 				RetracePath(startNode, currentNode);
 				OPEN.Clear();
 				CLOSED.Clear();
@@ -156,7 +158,10 @@ public class PathFinding : MonoBehaviour
 				}
 
 				if (!OPEN.ContainsKey(neighbour.pos))
+				{
 					OPEN.Add(neighbour.pos, neighbour);
+					Operations.Add(neighbour.pos, neighbour);
+				}
 			}
 		}
 
@@ -195,6 +200,7 @@ public class PathFinding : MonoBehaviour
 			{
 				sw.Stop();
 				print(("Optimised Path: " + sw.ElapsedMilliseconds + "ms"));
+				print("Operations: " + ContainsOPEN.Count);
 				RetracePath(startNode, currentNode);
 				CLOSED.Clear();
 				ContainsOPEN.Clear();
