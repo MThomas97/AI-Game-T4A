@@ -10,6 +10,7 @@ public class PathFinding : MonoBehaviour
 
     private static int MOVE_STRIAGHT_COST = 10;
     private static int MOVE_DIAGONAL_COST = 20;
+	private int CostofPath = 0;
 
 	public bool DebugCorners = true;
 	public bool ToggleHeapOptimisation = true;
@@ -35,9 +36,9 @@ public class PathFinding : MonoBehaviour
     {
 		List<Node> neighbours = new List<Node>();
 
-        for (int y = -1; y < 2; y++)
+        for (int x = -1; x < 2; x++)
         {	
-            for (int x = -1; x < 2; x++)
+            for (int y = -1; y < 2; y++)
             {
 				if (!World.IsPositionWalkable(new Vector2Int(x + currentNode.pos.x, y + currentNode.pos.y)))
 					continue;
@@ -135,8 +136,10 @@ public class PathFinding : MonoBehaviour
 			if (currentNode.pos == targetNode.pos) 
 			{
 				sw.Stop();
+				CostofPath = currentNode.gCost;
 				print(("Unoptimised Path: " + sw.ElapsedMilliseconds + "ms"));
 				print("Operations: " + Operations.Count);
+				print("Path Cost: " + pathCost);
 				RetracePath(startNode, currentNode);
 				OPEN.Clear();
 				CLOSED.Clear();
@@ -155,13 +158,15 @@ public class PathFinding : MonoBehaviour
 					neighbour.gCost = newMovementCostToNeighbour;
 					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
-				}
-
-				if (!OPEN.ContainsKey(neighbour.pos))
-				{
 					OPEN.Add(neighbour.pos, neighbour);
 					Operations.Add(neighbour.pos, neighbour);
 				}
+
+				//if (!OPEN.ContainsKey(neighbour.pos))
+				//{
+				//	OPEN.Add(neighbour.pos, neighbour);
+				//	Operations.Add(neighbour.pos, neighbour);
+				//}
 			}
 		}
 
@@ -194,14 +199,17 @@ public class PathFinding : MonoBehaviour
 		while (OPEN.Count > 0)
 		{
 			Node currentNode = OPEN.RemoveFirst();
+
 			if(!CLOSED.ContainsKey(currentNode.pos))
 				CLOSED.Add(currentNode.pos, currentNode);
 
 			if (currentNode.pos == targetNode.pos)
 			{
 				sw.Stop();
+				CostofPath = currentNode.gCost;
 				print(("Optimised Path: " + sw.ElapsedMilliseconds + "ms"));
 				print("Operations: " + ContainsOPEN.Count);
+				print("Path Cost: " + pathCost);
 				RetracePath(startNode, currentNode);
 				CLOSED.Clear();
 				ContainsOPEN.Clear();
@@ -213,17 +221,13 @@ public class PathFinding : MonoBehaviour
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
 				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
-				neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
+	
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
 				if (newMovementCostToNeighbour < neighbour.gCost || !ContainsOPEN.ContainsKey(neighbour.pos))
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
 					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
-				}
-
-				if (!ContainsOPEN.ContainsKey(neighbour.pos))
-				{
 					OPEN.Add(neighbour);
 					ContainsOPEN.Add(neighbour.pos, neighbour);
 				}
@@ -233,6 +237,14 @@ public class PathFinding : MonoBehaviour
 		print("Didn't hit target.");
 		CLOSED.Clear();
 		ContainsOPEN.Clear();
+	}
+
+	public int pathCost
+	{
+		get
+		{
+			return CostofPath;
+		}
 	}
 
 	void OnDrawGizmos()
