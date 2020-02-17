@@ -149,13 +149,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dcc2db03d882954fbd931a0d214b776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldTileDimensions: {x: 100, y: 100}
+  WorldDimensions: {x: 100, y: 100}
   worldGenerationTexture: {fileID: 0}
   perlinSeed: 4
   totalAgentsOnATeam: 1
   baseTileObject: {fileID: 5733350643558169301, guid: a9a1d427ac071b7478b75a5c737d0cc1,
     type: 3}
   baseAgentObject: {fileID: 0}
+  WorldSize: 64
 --- !u!4 &89503318
 Transform:
   m_ObjectHideFlags: 0
@@ -338,7 +339,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1527754173}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 49.92, y: 8.53, z: 0}
+  m_LocalPosition: {x: 21.5, y: 22.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -357,7 +358,6 @@ GameObject:
   - component: {fileID: 1735330874}
   - component: {fileID: 1735330873}
   - component: {fileID: 1735330878}
-  - component: {fileID: 1735330877}
   m_Layer: 0
   m_Name: Seeker
   m_TagString: Untagged
@@ -431,24 +431,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1735330872}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 85.21, y: 21.68, z: 0}
+  m_LocalPosition: {x: 26.7, y: 27.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1735330877
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1735330872}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 116ac7a44f841904d80ac6ad2e8eb2ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1735330878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -462,6 +450,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1527754177}
-  MOVE_STRIAGHT_COST: 10
-  MOVE_DIAGONAL_COST: 100
   DebugCorners: 1
+  ToggleHeapOptimisation: 1

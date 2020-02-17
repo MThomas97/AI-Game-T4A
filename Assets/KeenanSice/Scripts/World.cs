@@ -58,7 +58,9 @@ public class World : MonoBehaviour
 
     public static Dictionary<Vector2Int, WorldTile> worldTiles = new Dictionary<Vector2Int, WorldTile>();
 
-    public Vector2Int worldTileDimensions = new Vector2Int(32,32);
+    public static Vector2Int worldTileDimensions = new Vector2Int(32, 32);
+
+    public Vector2Int WorldDimensions = new Vector2Int(32, 32);
 
     //KS - Optional, will generate using perlin if not specified.
     public Texture2D worldGenerationTexture;
@@ -75,7 +77,8 @@ public class World : MonoBehaviour
     public static List<SpawnpointTile> spawnpointTiles = new List<SpawnpointTile>();
     public static List<HealthTile> healthTiles = new List<HealthTile>();
     public static List<AmmoTile> ammoTiles = new List<AmmoTile>();
-    public static List<AgentController> agents = new List<AgentController>(); 
+    public static List<AgentController> agents = new List<AgentController>();
+    public int WorldSize;
 
     void Start()
     {
@@ -125,6 +128,8 @@ public class World : MonoBehaviour
     void GenerateWorld()
     {
         worldTiles.Clear();
+
+        worldTileDimensions = WorldDimensions;
 
         if(worldGenerationTexture != null)
         {
@@ -239,6 +244,13 @@ public class World : MonoBehaviour
 
                 SetupTile(newTile, x, y);
             }
+        }
+    }
+    public static int WorldMaxSize
+    {
+        get
+        {
+            return worldTileDimensions.x * worldTileDimensions.y;
         }
     }
 

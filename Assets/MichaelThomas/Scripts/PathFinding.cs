@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
 
 public class PathFinding : MonoBehaviour
 {
@@ -11,8 +12,9 @@ public class PathFinding : MonoBehaviour
     private static int MOVE_DIAGONAL_COST = 20;
 
 	public bool DebugCorners = true;
+	public bool ToggleHeapOptimisation = true;
 
-    public Node calculatedPathStartNode = null;
+	public Node calculatedPathStartNode = null;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +25,7 @@ public class PathFinding : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if (target != null)
+		if (target != null && Input.GetKeyDown(KeyCode.W))
 		{
 			CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
 		}
@@ -37,38 +39,38 @@ public class PathFinding : MonoBehaviour
         {	
             for (int x = -1; x < 2; x++)
             {
-				if (!World.IsPositionWalkable(new Vector2Int (x + currentNode.pos.x, y + currentNode.pos.y)))
+				if (!World.IsPositionWalkable(new Vector2Int(x + currentNode.pos.x, y + currentNode.pos.y)))
 					continue;
-				if(x == 0 && y == 0)
+				if (x == 0 && y == 0)
 					continue;
 
 				Node newNeighbour = new Node(new Vector2Int(x + currentNode.pos.x, y + currentNode.pos.y));
 
-				if(DebugCorners && x != 0 && y != 0)
+				if (DebugCorners && x != 0 && y != 0)
 				{
 					bool adjacentWall = false;
 
-					for(int v = -1; v < 2; v++)
+					for (int v = -1; v < 2; v++)
 					{
-						if(v == 0) continue;
+						if (v == 0) continue;
 
-						if(!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(0, v))) adjacentWall = true;
+						if (!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(0, v))) adjacentWall = true;
 					}
 
-					for(int h = -1; h < 2; h++)
+					for (int h = -1; h < 2; h++)
 					{
-						if(h == 0) continue;
+						if (h == 0) continue;
 
-						if(!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(h, 0))) adjacentWall = true;
+						if (!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(h, 0))) adjacentWall = true;
 					}
 
-					if(!adjacentWall) neighbours.Add(newNeighbour);
+					if (!adjacentWall) neighbours.Add(newNeighbour);
 				}
 				else
 				{
 					neighbours.Add(newNeighbour);
 				}
-            }
+			}
         }
 		return neighbours;
     }
@@ -83,17 +85,30 @@ public class PathFinding : MonoBehaviour
 		return MOVE_DIAGONAL_COST * distX + MOVE_STRIAGHT_COST * (distY - distX);
 	}
 
-    public void CalculatePath(Vector2Int startPos, Vector2Int targetPos)
-	{ //Need to fix path so it finds the optimal route and not going towards the target when there is wall in the way
-		//rewrite to discard node that end up not being the optimal route
+	public void CalculatePath(Vector2Int startPos, Vector2Int targetPos)
+	{
+		if (ToggleHeapOptimisation)
+			CalculateOptimisedPath(startPos, targetPos); //This used heap optimisation to run faster
+		else
+		{
+			CalculateSlowPath(startPos, targetPos); //This uses Dictionary to look up nodes (Slower)
+		}
+	}
+
+	public void CalculateSlowPath(Vector2Int startPos, Vector2Int targetPos)
+	{
+		Stopwatch sw = new Stopwatch();
+		sw.Start();
+
 		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
 		{
 			calculatedPathStartNode = null;
-			Debug.Log("Target is out of bounds.");
+			print("Target is out of bounds.");
 			return;
 		}
 		Node startNode = new Node(startPos);
 		Node targetNode = new Node (targetPos);
+
 		Dictionary<Vector2Int, Node> OPEN = new Dictionary<Vector2Int, Node>();
 		Dictionary<Vector2Int, Node> CLOSED = new Dictionary<Vector2Int, Node>();
 
@@ -118,6 +133,8 @@ public class PathFinding : MonoBehaviour
 
 			if (currentNode.pos == targetNode.pos) 
 			{
+				sw.Stop();
+				print(("Unoptimised Path: " + sw.ElapsedMilliseconds + "ms"));
 				RetracePath(startNode, currentNode);
 				OPEN.Clear();
 				CLOSED.Clear();
@@ -126,7 +143,7 @@ public class PathFinding : MonoBehaviour
 
 			foreach (Node neighbour in GetNeighbours(currentNode)) 
 			{
-				if (CLOSED.ContainsKey(neighbour.pos))
+				if (CLOSED.ContainsKey(neighbour.pos) || !World.IsPositionWalkable(neighbour.pos))
 					continue;
 				neighbour.gCost = GetDistance(neighbour, startNode);
 				
@@ -143,11 +160,73 @@ public class PathFinding : MonoBehaviour
 			}
 		}
 
-		Debug.Log("Didn't hit target.");
+		print("Didn't hit target.");
 
 		OPEN.Clear();
 		CLOSED.Clear();
     }
+
+	public void CalculateOptimisedPath(Vector2Int startPos, Vector2Int targetPos)
+	{
+		Stopwatch sw = new Stopwatch();
+		sw.Start();
+
+		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
+		{
+			calculatedPathStartNode = null;
+			print("Target is out of bounds.");
+			return;
+		}
+		Node startNode = new Node(startPos);
+		Node targetNode = new Node(targetPos);
+
+		Heap<Node> OPEN = new Heap<Node>(World.WorldMaxSize);
+		Dictionary<Vector2Int, Node> ContainsOPEN = new Dictionary<Vector2Int, Node>();
+		Dictionary<Vector2Int, Node> CLOSED = new Dictionary<Vector2Int, Node>();
+
+		OPEN.Add(startNode);
+
+		while (OPEN.Count > 0)
+		{
+			Node currentNode = OPEN.RemoveFirst();
+			CLOSED.Add(currentNode.pos, currentNode);
+
+			if (currentNode.pos == targetNode.pos)
+			{
+				sw.Stop();
+				print(("Optimised Path: " + sw.ElapsedMilliseconds + "ms"));
+				RetracePath(startNode, currentNode);
+				CLOSED.Clear();
+				ContainsOPEN.Clear();
+				return;
+			}
+
+			foreach (Node neighbour in GetNeighbours(currentNode))
+			{
+				if (CLOSED.ContainsKey(neighbour.pos))
+					continue;
+				neighbour.gCost = GetDistance(neighbour, startNode);
+				neighbour.hCost = GetDistance(neighbour, targetNode);
+				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+				if (newMovementCostToNeighbour < neighbour.gCost || !ContainsOPEN.ContainsKey(neighbour.pos))
+				{
+					neighbour.gCost = newMovementCostToNeighbour;
+					neighbour.hCost = GetDistance(neighbour, targetNode);
+					neighbour.parent = currentNode;
+				}
+
+				if (!ContainsOPEN.ContainsKey(neighbour.pos))
+				{
+					OPEN.Add(neighbour);
+					ContainsOPEN.Add(neighbour.pos, neighbour);
+				}
+			}
+		}
+
+		print("Didn't hit target.");
+		CLOSED.Clear();
+		ContainsOPEN.Clear();
+	}
 
 	void OnDrawGizmos()
 	{
