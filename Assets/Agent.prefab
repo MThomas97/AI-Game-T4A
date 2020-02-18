@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4616702162236567790}
   - component: {fileID: 4616702162236567789}
-  - component: {fileID: 4616702162236567791}
   - component: {fileID: 4616702162236567788}
   - component: {fileID: 4616702162236567699}
   m_Layer: 0
@@ -82,21 +81,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4616702162236567791
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4616702162236567698}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b5e8b2cb976bb642894e45d80bbf66f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  DebugCorners: 1
-  ToggleHeapOptimisation: 1
 --- !u!114 &4616702162236567788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,6 +93,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4586ee74c060df489f132567d7c9316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ammoCount: 30
   rotationSpeed: 80
   teamNumber: -1
   fieldOfView: 90
@@ -125,3 +110,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 143797abe119a334fb52106786d97e4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetObject: {fileID: 0}

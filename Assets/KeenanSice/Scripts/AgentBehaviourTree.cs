@@ -47,12 +47,12 @@ public class AgentBehaviourTree : MonoBehaviour
 
     public GameObject targetObject;
     AgentController agentController;
-    PathFinding pathFinding;
+    //PathFinding pathFinding;
 
     void Start()
     {
         agentController = GetComponent<AgentController>();
-        pathFinding = GetComponent<PathFinding>();
+        //pathFinding = GetComponent<PathFinding>();
 
         SetupBehaviour();
     }
