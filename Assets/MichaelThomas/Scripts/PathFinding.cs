@@ -5,8 +5,9 @@ using System.Diagnostics;
 
 public class PathFinding : MonoBehaviour
 {
-    private Transform seeker;
-    public Transform target;
+	//private Transform seeker;
+	//public Transform target;
+	PathRequestManager requestManager;
 
     private static int MOVE_STRIAGHT_COST = 10;
     private static int MOVE_DIAGONAL_COST = 20;
@@ -18,18 +19,24 @@ public class PathFinding : MonoBehaviour
 	public Node calculatedPathStartNode = null;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        seeker = transform;
+		requestManager = GetComponent<PathRequestManager>();
+        //seeker = transform;
 	}
 
-    // Update is called once per frame
-    void Update()
-    {
-		if (target != null && Input.GetKeyDown(KeyCode.W))
-		{
-			CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
-		}
+	public void StartFindPath(Vector2Int startPos, Vector2Int endPos)
+	{
+		StartCoroutine(CalculateOptimisedPath(startPos, endPos));
+		//if (ToggleHeapOptimisation)
+		//{
+		//	StartCoroutine(CalculateOptimisedPath(startPos, endPos));
+		//	//CalculatePath(new Vector2Int(Mathf.RoundToInt(seeker.position.x), Mathf.RoundToInt(seeker.position.y)), new Vector2Int(Mathf.RoundToInt(target.position.x), Mathf.RoundToInt(target.position.y)));
+		//}
+		//else 
+		//{
+		//	StartCoroutine(CalculateSlowPath(startPos, endPos));
+		//}
 	}
 
 	List<Node> GetNeighbours(Node currentNode)
@@ -96,7 +103,7 @@ public class PathFinding : MonoBehaviour
 		}
 	}
 
-	public void CalculateSlowPath(Vector2Int startPos, Vector2Int targetPos)
+	IEnumerator CalculateSlowPath(Vector2Int startPos, Vector2Int targetPos)
 	{
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
@@ -105,7 +112,7 @@ public class PathFinding : MonoBehaviour
 		{
 			calculatedPathStartNode = null;
 			print("Target is out of bounds.");
-			return;
+			yield return null;
 		}
 		Node startNode = new Node(startPos);
 		Node targetNode = new Node (targetPos);
@@ -143,7 +150,7 @@ public class PathFinding : MonoBehaviour
 				RetracePath(startNode, currentNode);
 				OPEN.Clear();
 				CLOSED.Clear();
-				return;
+				yield return null;
 			}
 
 			foreach (Node neighbour in GetNeighbours(currentNode)) 
@@ -161,12 +168,6 @@ public class PathFinding : MonoBehaviour
 					OPEN.Add(neighbour.pos, neighbour);
 					Operations.Add(neighbour.pos, neighbour);
 				}
-
-				//if (!OPEN.ContainsKey(neighbour.pos))
-				//{
-				//	OPEN.Add(neighbour.pos, neighbour);
-				//	Operations.Add(neighbour.pos, neighbour);
-				//}
 			}
 		}
 
@@ -174,18 +175,23 @@ public class PathFinding : MonoBehaviour
 
 		OPEN.Clear();
 		CLOSED.Clear();
+		yield return null;
+
     }
 
-	public void CalculateOptimisedPath(Vector2Int startPos, Vector2Int targetPos)
+	IEnumerator CalculateOptimisedPath(Vector2Int startPos, Vector2Int targetPos)
 	{
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
+
+		Vector2Int[] waypoints = new Vector2Int[0];
+		bool pathSuccess = false;
 
 		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
 		{
 			calculatedPathStartNode = null;
 			print("Target is out of bounds.");
-			return;
+			yield return null;
 		}
 		Node startNode = new Node(startPos);
 		Node targetNode = new Node(targetPos);
@@ -196,9 +202,11 @@ public class PathFinding : MonoBehaviour
 
 		OPEN.Add(startNode);
 
+		Node currentNode = new Node(startPos);
+
 		while (OPEN.Count > 0)
 		{
-			Node currentNode = OPEN.RemoveFirst();
+			currentNode = OPEN.RemoveFirst();
 
 			if(!CLOSED.ContainsKey(currentNode.pos))
 				CLOSED.Add(currentNode.pos, currentNode);
@@ -210,10 +218,10 @@ public class PathFinding : MonoBehaviour
 				print(("Optimised Path: " + sw.ElapsedMilliseconds + "ms"));
 				print("Operations: " + ContainsOPEN.Count);
 				print("Path Cost: " + pathCost);
-				RetracePath(startNode, currentNode);
+				pathSuccess = true;
 				CLOSED.Clear();
 				ContainsOPEN.Clear();
-				return;
+				break;
 			}
 
 			foreach (Node neighbour in GetNeighbours(currentNode))
@@ -234,9 +242,12 @@ public class PathFinding : MonoBehaviour
 			}
 		}
 
-		print("Didn't hit target.");
-		CLOSED.Clear();
-		ContainsOPEN.Clear();
+		yield return null;
+		if(pathSuccess)
+		{
+			waypoints = RetracePath(startNode, currentNode);
+		}
+		requestManager.FinishedProcessingPath(waypoints, pathSuccess);
 	}
 
 	public int pathCost
@@ -271,7 +282,7 @@ public class PathFinding : MonoBehaviour
         }
 	}
 
-	void RetracePath(Node startNode, Node targetNode)
+	Vector2Int[] RetracePath(Node startNode, Node targetNode)
 	{
         Node previousNode = null;
 		Node currentNode = targetNode;
@@ -289,5 +300,30 @@ public class PathFinding : MonoBehaviour
 
         currentNode.parent = previousNode;
         calculatedPathStartNode = currentNode;
+		Vector2Int[] waypoints = SimplifyPath(calculatedPathStartNode);
+		return waypoints;
+	}
+
+	Vector2Int[] SimplifyPath(Node path)
+	{
+		List<Vector2Int> waypoints = new List<Vector2Int>();
+		Vector2 directionOld = Vector2.zero;
+
+		if (calculatedPathStartNode != null)
+		{
+			Node currentNode = calculatedPathStartNode;
+
+			while (currentNode != null)
+			{
+				Vector2Int directionNew = new Vector2Int(path.pos.x - path.parent.pos.x, path.pos.y - path.parent.pos.y);
+				if (directionNew != directionOld)
+				{
+					waypoints.Add(new Vector2Int(currentNode.pos.x, currentNode.pos.y));
+				}
+				directionOld = directionNew;
+				currentNode = currentNode.parent;
+			}
+		}
+		return waypoints.ToArray();
 	}
 }
