@@ -239,6 +239,11 @@ public class PathFinding : MonoBehaviour
 					OPEN.Add(neighbour);
 					ContainsOPEN.Add(neighbour.pos, neighbour);
 				}
+
+				//if (!OPEN.Contains(neighbour))
+				//	OPEN.Add(neighbour);
+				//else
+				//	OPEN.UpdateItem(neighbour);
 			}
 		}
 
