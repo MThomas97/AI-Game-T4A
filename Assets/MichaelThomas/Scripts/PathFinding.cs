@@ -12,7 +12,7 @@ public static class PathFinding
 	public static bool DebugCorners = true;
 	public static bool ToggleHeapOptimisation = true;
 
-	private static List<Node> GetNeighbours(Node currentNode)
+    private static List<Node> GetNeighbours(Node currentNode)
     {
 		List<Node> neighbours = new List<Node>();
 
@@ -197,23 +197,32 @@ public static class PathFinding
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
 				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
+				neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 	
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
-				if (newMovementCostToNeighbour < neighbour.gCost || !ContainsOPEN.ContainsKey(neighbour.pos))
+                
+				if (newMovementCostToNeighbour < neighbour.gCost)
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
-					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
-					OPEN.Add(neighbour);
-					ContainsOPEN.Add(neighbour.pos, neighbour);
+     //               OPEN.CheckItem(neighbour, neighbour.pos);
+					//OPEN.Add(neighbour);
+					//ContainsOPEN.Add(neighbour.pos, neighbour);
 				}
 
-                //if (!OPEN.Contains(neighbour))
-                //    OPEN.Add(neighbour);
+                if (!OPEN.Contains(neighbour))
+                {
+                    OPEN.Add(neighbour);
+                    ContainsOPEN.Add(neighbour.pos, neighbour);
+                }
+                //else
+                //{
+
+                //}
                 //else
                 //    OPEN.UpdateItem(neighbour);
             }
-		}
+        }
 
         output += "Couldn't find path.\n";
         CLOSED.Clear();

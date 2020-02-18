@@ -39,7 +39,51 @@ public class Heap<T> where T : IHeapItem<T>
 
     public bool Contains(T item)
     {
-        return Equals(items[item.HeapIndex], item);
+        if (item.CompareTo(items[0]) == 0)
+            return true;
+        int counter = 0;
+        while (true)
+        {
+            if (counter > 32 * 32)
+                Debug.Break();
+
+            counter++;
+            int childIndexLeft = item.HeapIndex * 2 + 1;
+            int childIndexRight = item.HeapIndex * 2 + 2;
+            int swapIndex = 0;
+
+            if (childIndexLeft < currentItemCount)
+            {
+                swapIndex = childIndexLeft;
+
+                if (childIndexRight < currentItemCount)
+                {
+                    if (items[childIndexLeft].CompareTo(items[childIndexRight]) < 0)
+                        swapIndex = childIndexRight;
+                }
+
+                if (item.CompareTo(items[swapIndex]) < 0)
+                {
+                    item.HeapIndex = items[swapIndex].HeapIndex;
+                }
+                else if(item.CompareTo(items[swapIndex]) == 0)
+                {
+                    if (item.itemPosition == items[swapIndex].itemPosition)
+                        return true;
+                    else
+                        item.HeapIndex = items[swapIndex].HeapIndex;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        //return Equals(items[item.HeapIndex], item);
     }
 
     public int Count
@@ -52,6 +96,7 @@ public class Heap<T> where T : IHeapItem<T>
 
     void SortDown(T item)
     {
+
         while(true)
         {
             int childIndexLeft = item.HeapIndex * 2 + 1;
@@ -67,7 +112,7 @@ public class Heap<T> where T : IHeapItem<T>
                     if (items[childIndexLeft].CompareTo(items[childIndexRight]) < 0)
                         swapIndex = childIndexRight;
                 }
-
+                
                 if (item.CompareTo(items[swapIndex]) < 0)
                     Swap(item, items[swapIndex]);
                 else
@@ -103,6 +148,11 @@ public class Heap<T> where T : IHeapItem<T>
         }
     }
 
+    void SetHeapIndex(T neighbour, T itemB)
+    {
+        neighbour.HeapIndex = itemB.HeapIndex;
+    }
+
     void Swap(T itemA, T itemB)
     {
         items[itemA.HeapIndex] = itemB;
@@ -119,5 +169,10 @@ public interface IHeapItem<T> : IComparable<T>
     {
         get;
         set;
+    }
+
+    Vector2Int itemPosition
+    {
+        get;
     }
 }
