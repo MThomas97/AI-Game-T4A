@@ -10,12 +10,10 @@ public class AgentBehaviourTree : MonoBehaviour
     {
         bt = new BehaviourTree(
             new Sequence(
+                new KSAction(CheckResetTargetTimer),
                 new Condition(agentController.HasAmmo,
                     //HasAmmo - true
-                    new Condition(SetTargetToEnemyInSight,
-                        new KSAction(DoNothing),
-                        new KSAction(DoNothing)
-                    ),
+                    new KSAction(DoNothing),
                     //HasAmmo - false
                     new Condition(SetTargetToClosestAmmo,
                         new KSAction(DoNothing),
@@ -23,9 +21,15 @@ public class AgentBehaviourTree : MonoBehaviour
                     )
                 ),
                 new Condition(HasTarget,
+                    //HasTarget - true
                     new Condition(IsTargetInRange,
                         //IsTargetInRange - true
-                        new KSAction(DoNothing),
+                        new Condition(IsFacingTarget,
+                            //IsFacingTarget - true
+                            new KSAction(DoNothing),
+                            //IsFacingTarget - false
+                            new KSAction(RotateTowards)                        
+                        ),
                         //IsTargetInRange - false
                         new Condition(HasReachedTarget,
                             //HasReachedTarget - true
@@ -39,21 +43,37 @@ public class AgentBehaviourTree : MonoBehaviour
                             )
                         )           
                     ),
-                    new KSAction(RotateAround)
+                    //HasTarget - false
+                    new Condition(SetTargetToEnemyInSight,
+                        new KSAction(DoNothing),
+                        new KSAction(RotateAround)
+                    )
                 )
             )
         );
     }
 
-    public GameObject targetObject;
+    public Node targetNode = null;
+    public GameObject targetObject = null;
+
     AgentController agentController;
-    //PathFinding pathFinding;
+
+    float reactionTimer = 0.0f;
+
+    void CheckResetTargetTimer()
+    {
+        reactionTimer += Time.deltaTime;
+
+        if (reactionTimer > agentController.reactionTime)
+        {
+            SetTarget(null);
+            reactionTimer = 0.0f;
+        }
+    }
 
     void Start()
     {
         agentController = GetComponent<AgentController>();
-        //pathFinding = GetComponent<PathFinding>();
-
         SetupBehaviour();
     }
 
@@ -71,15 +91,18 @@ public class AgentBehaviourTree : MonoBehaviour
 
     bool HasTarget()
     {
-        return targetObject != null;
+        return targetNode != null;
     }
 
     bool SetTargetToClosestAmmo()
     {
+        GameObject target = null;
+
         if (World.ammoTiles.Count > 0)
         {
             float closestDistance = Vector3.Distance(transform.position, World.ammoTiles[0].mTileObject.transform.position);
-            targetObject = World.ammoTiles[0].mTileObject;
+
+            target = World.ammoTiles[0].mTileObject;
 
             for(int i = 1; i < World.ammoTiles.Count; i++)
             {
@@ -87,28 +110,42 @@ public class AgentBehaviourTree : MonoBehaviour
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    targetObject = World.ammoTiles[i].mTileObject;
+                    target = World.ammoTiles[i].mTileObject;
                 }
             }
-
-            return true;
         }
 
-        return false;
+        SetTarget(target);
+
+        return target != null;
+    }
+
+    void SetTarget(GameObject target)
+    {
+        string outDebugString = "";
+
+        if (target != targetObject)
+        {
+            targetNode = target == null ? null : PathFinding.CalculatePath(transform.position, target.transform.position, out outDebugString);
+            targetNode = targetNode != null ? targetNode.parent : targetNode;
+        }
+        agentController.UpdatePathfindingDebug(targetNode, outDebugString);
+
+        targetObject = target;
     }
 
     bool IsTargetInRange()
     {
-        if (targetObject != null)
+        if (targetNode != null && targetNode.parent == null)
         {
             if (targetObject.layer == 8)
             {
                 return false;
             }
 
-            RaycastHit2D hit = Physics2D.Linecast(transform.position, targetObject.transform.position);
+            RaycastHit2D hit = Physics2D.Linecast(transform.position, targetNode.GetVector3Position());
             if (hit.collider != null) return false;
-            return (Vector3.Distance(transform.position, targetObject.transform.position) < agentController.attackRange);
+            return (Vector3.Distance(transform.position, targetNode.GetVector3Position()) < agentController.attackRange);
         }
 
         return false;
@@ -117,6 +154,8 @@ public class AgentBehaviourTree : MonoBehaviour
     bool SetTargetToEnemyInSight()
     {
         float closestDistance = -1.0f;
+
+        GameObject target = null;
 
         foreach (AgentController enemy in World.agents)
         {
@@ -128,7 +167,7 @@ public class AgentBehaviourTree : MonoBehaviour
 
             if(angle > agentController.fieldOfView * 0.5f) continue;
 
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);            
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
 
             if (distance < closestDistance || closestDistance < 0)
             {
@@ -137,32 +176,43 @@ public class AgentBehaviourTree : MonoBehaviour
                 if (hit.collider != null) continue;
 
                 closestDistance = distance;
-                targetObject = enemy.gameObject;
+                target = enemy.gameObject;
 
                 Debug.DrawRay(transform.position, enemyDir, Color.red);
             }
         }
 
-        //Looks odd I know, but it is faster than >= 0, the chance of distance being 0 is very slim, but for less readable code, I think it is justified.
-        return !(closestDistance < 0);
+        SetTarget(target);
+
+        return target != null;
     }
 
     bool HasReachedTarget()
     {
-        return transform.position == targetObject.transform.position;
+        bool reachedNode = Vector3.Distance(transform.position, targetNode.GetVector3Position()) < 0.05f;
+
+        if(reachedNode)
+        {
+            targetNode = targetNode.parent;
+
+            return targetNode == null;
+        }
+
+        return reachedNode;
     }
 
     bool IsFacingTarget()
     {
-        Vector3 targetDirection = Vector3.Normalize(targetObject.transform.position - transform.position);
+        Vector3 targetDirection = Vector3.Normalize(targetNode.GetVector3Position() - transform.position);
         return transform.right == targetDirection;
     }
 
     void RotateTowards()
     {
-        Vector3 targetDirection = targetObject.transform.position - transform.position;
+        Vector3 targetDirection = Vector3.Normalize(targetNode.GetVector3Position() - transform.position);
         float angle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
         Quaternion quart = Quaternion.AngleAxis(angle, Vector3.forward);
+
         transform.rotation = Quaternion.RotateTowards(transform.rotation, quart, Time.deltaTime * agentController.rotationSpeed);
     }
 
@@ -173,6 +223,6 @@ public class AgentBehaviourTree : MonoBehaviour
 
     void MoveForward()
     {
-        transform.localPosition += transform.right * Time.deltaTime;
+        transform.localPosition += transform.right * Time.deltaTime * agentController.movementSpeed;
     }
 }

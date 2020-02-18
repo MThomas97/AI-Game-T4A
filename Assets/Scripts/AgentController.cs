@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class AgentController : MonoBehaviour
 {
-    Node path = null;
     public int ammoCount = 30;
     int health = 100;
 
@@ -15,9 +14,11 @@ public class AgentController : MonoBehaviour
     public int teamNumber = -1;
     public float fieldOfView = 90.0f;
     public float attackRange = 20.0f;
-
+    public float reactionTime = 5.0f;
+    public float movementSpeed = 1.0f;
     //Debugging
     Text onScreenDebug;
+    Node pathDebug = null;
 
     struct AgentPositionPreviouslySeen
     {
@@ -45,35 +46,47 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UpdatePathfindingDebug(Node debugPath, string debugString)
     {
-        string debugOut = "";
-        path = PathFinding.CalculatePath(transform.position, World.ammoTiles[0].mTileObject.transform.position, out debugOut);
-        onScreenDebug.text = debugOut;
+        pathDebug = debugPath;
+
+        if (debugString.Length > 0)
+        {
+            onScreenDebug.text = debugString;
+        }
     }
 
     void OnDrawGizmos()
     {
-        if(teamNumber > -1)
+        if (teamNumber > -1)
+        {
             Gizmos.color = World.playerColours[teamNumber];
 
-        if (path != null)
-        {
-            Node currentNode = path;
+            //Avoid debug overlaps.
+            Vector3 offset = new Vector3(0.1f, 0.1f, 0.0f) * teamNumber + new Vector3(-0.2f, -0.2f, -0.0f);
 
-            while (currentNode != null)
+            if (pathDebug != null)
             {
-                Vector3 currentPos = new Vector3(currentNode.pos.x, currentNode.pos.y, 0);
+                Node currentNode = pathDebug;
 
+                Vector3 currentPos = transform.position + offset;
                 Gizmos.DrawWireCube(currentPos, new Vector3(1.0f, 1.0f));
+                Gizmos.DrawLine(currentPos, new Vector3(currentNode.pos.x, currentNode.pos.y, 0) + offset);
 
-                if (currentNode.parent != null)
+                while (currentNode != null)
                 {
-                    Gizmos.DrawLine(currentPos, new Vector3(currentNode.parent.pos.x, currentNode.parent.pos.y, 0));
-                }
+                    currentPos = new Vector3(currentNode.pos.x, currentNode.pos.y, 0) + offset;
 
-                currentNode = currentNode.parent;
+                    Gizmos.DrawWireCube(currentPos, new Vector3(1.0f, 1.0f));
+
+                    if (currentNode.parent != null)
+                    {
+                        Vector3 parentPos = new Vector3(currentNode.parent.pos.x, currentNode.parent.pos.y, 0) + offset;
+                        Gizmos.DrawLine(currentPos, parentPos);
+                    }
+
+                    currentNode = currentNode.parent;
+                }
             }
         }
     }

@@ -94,10 +94,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ammoCount: 30
-  rotationSpeed: 80
+  rotationSpeed: 200
   teamNumber: -1
-  fieldOfView: 90
+  fieldOfView: 360
   attackRange: 10
+  reactionTime: 1
 --- !u!114 &4616702162236567699
 MonoBehaviour:
   m_ObjectHideFlags: 0

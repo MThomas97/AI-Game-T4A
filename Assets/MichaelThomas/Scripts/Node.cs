@@ -34,6 +34,12 @@ public class Node : IHeapItem<Node>
 		}
 	}
 
+    public Vector3 GetVector3Position()
+    {
+        return new Vector3(pos.x, pos.y);
+    }
+
+
 	public int CompareTo(Node nodeToCompare)
 	{
 		int compare = fCost.CompareTo(nodeToCompare.fCost);
