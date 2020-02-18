@@ -44,8 +44,29 @@ public class Unit : MonoBehaviour
                 }
                 currentWaypoint = path[targetIndex];
             }
-            transform.position = Vector3.MoveTowards(new Vector3(seeker.x, seeker.y, 0), new Vector3(currentWaypoint.x, currentWaypoint.y, 0), speed);
+            transform.position = Vector3.MoveTowards(new Vector3(seeker.x, seeker.y, 0), new Vector3(currentWaypoint.x, currentWaypoint.y, 0), speed * Time.deltaTime);
             yield return null;
+        }
+    }
+
+    public void OnDrawGizmos()
+    {
+        if(path != null)
+        {
+            for (int i = targetIndex; i < path.Length; i++)
+            {
+                Gizmos.color = Color.black;
+                Gizmos.DrawCube(new Vector3(path[i].x, path[i].y, 0), Vector3.one);
+
+                if(i == targetIndex)
+                {
+                    Gizmos.DrawLine(transform.position, new Vector3(path[i].x, path[i].y, 0));
+                }
+                else
+                {
+                    Gizmos.DrawLine(new Vector3(path[i - 1].x, path[i - 1].y, 0), new Vector3(path[i].x, path[i].y, 0));
+                }
+            }
         }
     }
 }
