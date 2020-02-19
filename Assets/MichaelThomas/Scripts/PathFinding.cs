@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 using System;
+using System.Linq;
 
 public static class PathFinding
 {
@@ -153,6 +154,7 @@ public static class PathFinding
 
 	private static Node CalculateOptimisedPath(Vector2Int startPos, Vector2Int targetPos, out string output)
 	{
+		int operationCount = 0;
         output = "";
 
         Stopwatch sw = new Stopwatch();
@@ -167,9 +169,8 @@ public static class PathFinding
 		Node targetNode = new Node(targetPos);
 
 		Heap<Node> OPEN = new Heap<Node>(World.WorldMaxSize);
-		Dictionary<Vector2Int, Node> ContainsOPEN = new Dictionary<Vector2Int, Node>();
+		Dictionary<Vector2Int, Node> Operations = new Dictionary<Vector2Int, Node>();
 		Dictionary<Vector2Int, Node> CLOSED = new Dictionary<Vector2Int, Node>();
-
 		OPEN.Add(startNode);
 
 		Node currentNode = new Node(startPos);
@@ -178,59 +179,43 @@ public static class PathFinding
 		{
 			currentNode = OPEN.RemoveFirst();
 
-			if(!CLOSED.ContainsKey(currentNode.pos))
-				CLOSED.Add(currentNode.pos, currentNode);
+			CLOSED.Add(currentNode.pos, currentNode);
 
 			if (currentNode.pos == targetNode.pos)
 			{
 				sw.Stop();
 				output += "Optimised Path: " + sw.ElapsedMilliseconds + "ms" + "\n";
-				output += "Operations: " + ContainsOPEN.Count + "\n";
+				output += "Operations: " + operationCount + "\n";
 				output += "Path Cost: " + currentNode.gCost + "\n";
                 CLOSED.Clear();
-				ContainsOPEN.Clear();
+				Operations.Clear();
                 return RetracePath(startNode, currentNode);
 			}
-
 			foreach (Node neighbour in GetNeighbours(currentNode))
 			{
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
 				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
-				neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 	
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
-                
-				if (newMovementCostToNeighbour < neighbour.gCost)
+					
+				if (newMovementCostToNeighbour < neighbour.gCost || !Operations.ContainsKey(neighbour.pos))
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
+					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
-     //               OPEN.CheckItem(neighbour, neighbour.pos);
-					//OPEN.Add(neighbour);
-					//ContainsOPEN.Add(neighbour.pos, neighbour);
+					OPEN.Add(neighbour);
+					Operations.Add(neighbour.pos, neighbour);
+					operationCount++;
 				}
-
-                if (!OPEN.Contains(neighbour))
-                {
-                    OPEN.Add(neighbour);
-                    ContainsOPEN.Add(neighbour.pos, neighbour);
-                }
-                //else
-                //{
-
-                //}
-                //else
-                //    OPEN.UpdateItem(neighbour);
             }
         }
 
         output += "Couldn't find path.\n";
         CLOSED.Clear();
-        ContainsOPEN.Clear();
+		Operations.Clear();
         return null;
 	}
-
-
 
 	static Node RetracePath(Node startNode, Node targetNode)
 	{
@@ -255,13 +240,10 @@ public static class PathFinding
 
 	static Node SimplifyPath(Node path)
 	{
-		List<Vector2Int> waypoints = new List<Vector2Int>();
-
         Node currentNode = path;
 
 		while (currentNode != null && currentNode.parent != null && currentNode.parent.parent != null)
 		{
-            
             Node nextNode = currentNode.parent;
             Node nextNode2 = currentNode.parent.parent;
 			Vector3 directionCurrentToNext = Vector3.Normalize(new Vector3(currentNode.pos.x - nextNode.pos.x, currentNode.pos.y - nextNode.pos.y, 0));
@@ -273,7 +255,6 @@ public static class PathFinding
 			}
             currentNode = currentNode.parent;
 		}
-
         return path;
 	}
 }

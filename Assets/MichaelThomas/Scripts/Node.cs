@@ -34,14 +34,6 @@ public class Node : IHeapItem<Node>
 		}
 	}
 
-    public Vector2Int itemPosition
-    {
-        get
-        {
-            return pos;
-        }
-    }
-
 	public int CompareTo(Node nodeToCompare)
 	{
 		int compare = fCost.CompareTo(nodeToCompare.fCost);
@@ -49,9 +41,7 @@ public class Node : IHeapItem<Node>
 		if(compare == 0)
         {
 			compare = gCost.CompareTo(nodeToCompare.gCost);
-            if (itemPosition == nodeToCompare.itemPosition)
-                return 2;
-        }
+		}
 
 		return -compare;
 	}
