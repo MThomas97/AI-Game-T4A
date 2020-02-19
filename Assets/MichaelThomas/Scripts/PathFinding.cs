@@ -167,7 +167,7 @@ public static class PathFinding
 		Node targetNode = new Node(targetPos);
 
 		Heap<Node> OPEN = new Heap<Node>(World.WorldMaxSize);
-		Dictionary<Vector2Int, Node> ContainsOPEN = new Dictionary<Vector2Int, Node>();
+		Dictionary<Vector2Int, Node> Operations = new Dictionary<Vector2Int, Node>();
 		Dictionary<Vector2Int, Node> CLOSED = new Dictionary<Vector2Int, Node>();
 
 		OPEN.Add(startNode);
@@ -185,10 +185,10 @@ public static class PathFinding
 			{
 				sw.Stop();
 				output += "Optimised Path: " + sw.ElapsedMilliseconds + "ms" + "\n";
-				output += "Operations: " + ContainsOPEN.Count + "\n";
+				output += "Operations: " + Operations.Count + "\n";
 				output += "Path Cost: " + currentNode.gCost + "\n";
                 CLOSED.Clear();
-				ContainsOPEN.Clear();
+				Operations.Clear();
                 return RetracePath(startNode, currentNode);
 			}
 
@@ -199,25 +199,20 @@ public static class PathFinding
 				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
 	
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
-				if (newMovementCostToNeighbour < neighbour.gCost || !ContainsOPEN.ContainsKey(neighbour.pos))
+				if (newMovementCostToNeighbour < neighbour.gCost || !Operations.ContainsKey(neighbour.pos))
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
 					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
 					neighbour.parent = currentNode;
 					OPEN.Add(neighbour);
-					ContainsOPEN.Add(neighbour.pos, neighbour);
+					Operations.Add(neighbour.pos, neighbour);
 				}
-
-                //if (!OPEN.Contains(neighbour))
-                //    OPEN.Add(neighbour);
-                //else
-                //    OPEN.UpdateItem(neighbour);
-            }
+			}
 		}
 
         output += "Couldn't find path.\n";
         CLOSED.Clear();
-        ContainsOPEN.Clear();
+		Operations.Clear();
         return null;
 	}
 
@@ -252,7 +247,6 @@ public static class PathFinding
 
 		while (currentNode != null && currentNode.parent != null && currentNode.parent.parent != null)
 		{
-            
             Node nextNode = currentNode.parent;
             Node nextNode2 = currentNode.parent.parent;
 			Vector3 directionCurrentToNext = Vector3.Normalize(new Vector3(currentNode.pos.x - nextNode.pos.x, currentNode.pos.y - nextNode.pos.y, 0));
@@ -264,7 +258,6 @@ public static class PathFinding
 			}
             currentNode = currentNode.parent;
 		}
-
         return path;
 	}
 }
