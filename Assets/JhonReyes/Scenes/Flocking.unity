@@ -151,8 +151,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 9093157825900653073, guid: 961f16a7a095f154fbbfc696b1536e42,
     type: 3}
-  behavior: {fileID: 0}
-  startingCount: 35
+  behavior: {fileID: 11400000, guid: 6afd6b98ad35df34d939b35635f3134c, type: 2}
+  startingCount: 67
   driveFactor: 10
   maxSpeed: 5
   neighborRadius: 1.5
@@ -248,7 +248,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744229438}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.9, y: -0.4, z: -8.44}
+  m_LocalPosition: {x: 0.9, y: -0.4, z: -15.94}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
