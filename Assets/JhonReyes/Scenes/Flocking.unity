@@ -151,7 +151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 9093157825900653073, guid: 961f16a7a095f154fbbfc696b1536e42,
     type: 3}
-  behavior: {fileID: 11400000, guid: 6afd6b98ad35df34d939b35635f3134c, type: 2}
+  behavior: {fileID: 11400000, guid: 17034c36b4f9e0b4f914f3aa46e5ccab, type: 2}
   startingCount: 67
   driveFactor: 10
   maxSpeed: 5
