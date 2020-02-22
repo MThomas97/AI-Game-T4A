@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class Parallel : Composite
 {
-    public enum Policy
-    {
-        RequireOne,
-        RequireAll,
-    }
-
     protected Policy successPolicy, failurePolicy;
 
     public Parallel(Policy success, Policy failure)
@@ -17,7 +11,6 @@ public class Parallel : Composite
         successPolicy = success;
         failurePolicy = failure;
     }
-
 
     public override Status Update()
     {
@@ -75,5 +68,11 @@ public class Parallel : Composite
         }
     }
 
+}
+
+public enum Policy
+{
+    RequireOne,
+    RequireAll,
 }
 

@@ -1,52 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static BehaviourTreeHelperFunctions;
 
-public class AgentBehaviourTree : MonoBehaviour
+public class AgentBehaviour : MonoBehaviour
 {
     BehaviourTree bt;
 
     void SetupBehaviour()
     {
-        bt = new BehaviourTree(
-            new Sequence(
-                new KSAction(CheckResetTargetTimer),
-                new Condition(agentController.HasAmmo,
+        bt = behaviourTree(
+            sequence(
+                action(CheckResetTargetTimer),
+                condition(agentController.HasAmmo,
                     //HasAmmo - true
-                    new KSAction(DoNothing),
+                    action(DoNothing),
                     //HasAmmo - false
-                    new Condition(SetTargetToClosestAmmo,
-                        new KSAction(DoNothing),
-                        new KSAction(DoNothing)
+                    condition(SetTargetToClosestAmmo,
+                        action(DoNothing),
+                        action(DoNothing)
                     )
                 ),
-                new Condition(HasTarget,
+                condition(HasTarget,
                     //HasTarget - true
-                    new Condition(IsTargetInRange,
+                    condition(IsTargetInRange,
                         //IsTargetInRange - true
-                        new Condition(IsFacingTarget,
+                        condition(IsFacingTarget,
                             //IsFacingTarget - true
-                            new KSAction(DoNothing),
+                            action(DoNothing),
                             //IsFacingTarget - false
-                            new KSAction(RotateTowards)                        
+                            action(RotateTowards)                        
                         ),
                         //IsTargetInRange - false
-                        new Condition(HasReachedTarget,
+                        condition(HasReachedTarget,
                             //HasReachedTarget - true
-                            new KSAction(DoNothing),
+                            action(DoNothing),
                             //HasReachedTarget - false
-                            new Condition(IsFacingTarget,
+                            condition(IsFacingTarget,
                                 //IsFacingTarget - true
-                                new KSAction(MoveForward),
+                                action(MoveForward),
                                 //IsFacingTarget - false
-                                new KSAction(RotateTowards)
+                                action(RotateTowards)
                             )
                         )           
                     ),
                     //HasTarget - false
-                    new Condition(SetTargetToEnemyInSight,
-                        new KSAction(DoNothing),
-                        new KSAction(RotateAround)
+                    condition(SetTargetToEnemyInSight,
+                        action(DoNothing),
+                        action(RotateAround)
                     )
                 )
             )

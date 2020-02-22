@@ -17,5 +17,4 @@ public class BehaviourTree
     {
         root = newRoot;
     }
-
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(AgentBehaviourTree))]
+[RequireComponent(typeof(AgentBehaviour))]
 
 public class AgentController : MonoBehaviour
 {

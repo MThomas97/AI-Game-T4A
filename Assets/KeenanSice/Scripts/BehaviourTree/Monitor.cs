@@ -14,6 +14,5 @@ public class Monitor : Parallel
         children.Add(action);
     }
 
-
     public Monitor(Policy success, Policy failure) : base(success, failure) { }
 }
