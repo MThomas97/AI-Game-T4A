@@ -76,6 +76,7 @@ public static class PathFinding
         return ToggleHeapOptimisation ? CalculateOptimisedPath(startPos, targetPos, out output) : CalculateSlowPath(startPos, targetPos, out output);
 	}
 
+
 	private static Node CalculateSlowPath(Vector2Int startPos, Vector2Int targetPos, out string output)
 	{
         output = "";
@@ -223,6 +224,7 @@ public static class PathFinding
         List<Node> path = new List<Node>();
         Node previousNode = null;
 		Node currentNode = targetNode;
+		int distance = currentNode.gCost;
 
 		while(currentNode != startNode)
 		{
@@ -235,7 +237,7 @@ public static class PathFinding
 		}
 
         currentNode.parent = previousNode;
-     
+		currentNode.distance = distance;
         return SimplifyPath(currentNode);
 	}
 

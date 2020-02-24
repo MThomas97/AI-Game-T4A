@@ -8,6 +8,7 @@ public class Node : IHeapItem<Node>
 
 	public int gCost; //Walking cost from start node
 	public int hCost; //Distance cost to reach end node
+	public int distance;
 	public Node parent;
 	int heapIndex;
 
