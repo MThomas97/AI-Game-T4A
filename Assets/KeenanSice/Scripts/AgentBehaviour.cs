@@ -14,10 +14,13 @@ public class AgentBehaviour : MonoBehaviour
                 action(CheckResetTargetTimer),
                 condition(agentController.HasAmmo,
                     //HasAmmo - true
-                    action(),
+                    condition(SetTargetToEnemyInSight,
+                        action(),
+                        action(StartPatrol)
+                    ),
                     //HasAmmo - false
                     action(SetTargetToClosestActiveAmmo)
-                    ),
+                ),
                 condition(HasTarget,
                     //HasTarget - true
                     condition(IsTargetInRange,
@@ -26,7 +29,8 @@ public class AgentBehaviour : MonoBehaviour
                             //IsFacingTarget - true
                             selector(
                                 action(AttackAgent),
-                                action(PickupCollectable)
+                                action(PickupCollectable),
+                                action(PatrolToNextTarget)
                             ),                      
                             //IsFacingTarget - false
                             action(RotateTowards)                        
@@ -38,11 +42,7 @@ public class AgentBehaviour : MonoBehaviour
                             action(RotateTowards)
                         )                              
                     ),
-                    //HasTarget - false
-                    condition(SetTargetToEnemyInSight,
-                        action(),
-                        action(RotateAround)
-                    )
+                    action()
                 )
             )
         );
@@ -67,40 +67,50 @@ public class AgentBehaviour : MonoBehaviour
 
     float reactionTimer = 0.0f;
 
+    bool patrolling = false;
+
+
     bool AttackAgent()
     {
-        AgentController ac = targetObject.GetComponent<AgentController>();
-
-        if(ac != null)
+        if (targetObject != null)
         {
-            agentController.Attack(ac);
-            return true;
-        }
+            AgentController ac = targetObject.GetComponent<AgentController>();
 
+            if (ac != null)
+            {
+                agentController.Attack(ac);
+                return true;
+            }
+        }
         return false;
     }
 
     bool PickupCollectable()
     {
-        BasePickup pickup = targetObject.GetComponent<BasePickup>();
-
-        if (pickup != null)
+        if (targetObject != null)
         {
-            agentController.Pickup(pickup);
-            return true;
-        }
+            BasePickup pickup = targetObject.GetComponent<BasePickup>();
 
+            if (pickup != null)
+            {
+                agentController.Pickup(pickup);
+                return true;
+            }
+        }
         return false;
     }
 
     bool CheckResetTargetTimer()
     {
-        reactionTimer += Time.deltaTime;
-
-        if (reactionTimer > agentController.reactionTime)
+        if (targetObject != null && targetObject.CompareTag("AIPlayer"))
         {
-            SetTarget(null);
-            reactionTimer = 0.0f;
+            reactionTimer += Time.deltaTime;
+
+            if (reactionTimer > agentController.reactionTime)
+            {
+                SetTarget(null);
+                reactionTimer = 0.0f;
+            }
         }
 
         return true;
@@ -113,11 +123,23 @@ public class AgentBehaviour : MonoBehaviour
 
     bool HasTarget()
     {
-        return targetObject != null;
+        return targetObject != null || targetNode != null;
     }
 
     bool SetTargetToClosestActiveAmmo()
     {
+        //Already have ammo target;
+        if (targetObject != null)
+        {
+            AmmoPickup targetAmmo = targetObject.GetComponent<AmmoPickup>();
+            if(targetAmmo && targetAmmo.IsPickupActive())
+            {
+                return true;
+            }
+        }
+
+        Debug.Log("AMMO");
+
         GameObject target = null;
 
         if (World.ammoTiles.Count > 0)
@@ -143,7 +165,7 @@ public class AgentBehaviour : MonoBehaviour
         return target != null;
     }
 
-    void SetTarget(GameObject target)
+    void SetTarget(GameObject target, bool isPatrolTarget = false)
     {
         string outDebugString = "";
 
@@ -152,15 +174,30 @@ public class AgentBehaviour : MonoBehaviour
             targetNode = target == null ? null : PathFinding.CalculatePath(transform.position, target.transform.position, out outDebugString);
             targetNode = targetNode != null ? targetNode.parent : targetNode;
         }
+        else if (targetNode != null && Vector3.Distance(transform.position, targetNode.GetVector3Position()) < 0.1f)
+        {
+            targetNode = targetNode != null ? targetNode.parent : targetNode;
+        }
+
         agentController.UpdatePathfindingDebug(targetNode, outDebugString);
 
         targetObject = target;
+        if (target == null) targetNode = null;
+        patrolling = isPatrolTarget;
     }
 
     bool IsTargetInRange()
     {
+        if(targetNode != null && targetNode.parent != null)
+        {
+            if (Vector3.Distance(transform.position, targetNode.GetVector3Position()) < 0.1f)
+            {
+                SetTarget(targetObject, patrolling);
+            }
+        }
+
         //No range layer. Must be on
-        if (targetObject.layer == 8)
+        if (targetObject != null && targetObject.layer == 8)
         {
             return (Vector3.Distance(transform.position, targetObject.transform.position) < 0.1f);
         }
@@ -201,7 +238,8 @@ public class AgentBehaviour : MonoBehaviour
             }
         }
 
-        SetTarget(target);
+        if (target != null) SetTarget(target);
+
         return target != null;
     }
 
@@ -254,5 +292,37 @@ public class AgentBehaviour : MonoBehaviour
     {
         transform.localPosition += transform.right * Time.deltaTime * agentController.movementSpeed;
         return true;
+    }
+
+    bool SetTargetToRandomSpawn()
+    {
+        int randomSpawnpointIndex = Mathf.RoundToInt(Random.Range(0.0f, World.spawnpointTiles.Count - 1));
+
+        if (Vector3.Distance(transform.position, World.spawnpointTiles[randomSpawnpointIndex].mTileObject.transform.position) < 5.0f)
+        {
+            randomSpawnpointIndex = (int)Mathf.Repeat(randomSpawnpointIndex + 1, World.spawnpointTiles.Count - 1);
+        }
+
+        SetTarget(World.spawnpointTiles[randomSpawnpointIndex].mTileObject, true);
+
+        return true;
+    }
+
+    bool PatrolToNextTarget()
+    {
+        if (patrolling)
+        {
+            SetTargetToRandomSpawn();
+        }
+
+        return false;
+    }
+
+    bool StartPatrol()
+    {
+        if (!patrolling) SetTargetToRandomSpawn();
+
+        return patrolling;
+
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AmmoPickup : BasePickup
 {
-    const int ammoAmount = 30;
+    const int ammoAmount = 5;
 
     public override void Pickup(AgentController instigator)
     {
