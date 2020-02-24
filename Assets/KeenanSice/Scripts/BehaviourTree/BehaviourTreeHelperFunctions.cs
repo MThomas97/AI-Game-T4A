@@ -21,9 +21,14 @@ public static class BehaviourTreeHelperFunctions
         return new Composite(newChildren);
     }
 
-    public static KSAction action(Action method)
+    public static KSAction action(Func<bool> method)
     {
         return new KSAction(method);
+    }
+
+    public static KSAction action(bool outcome = true)
+    {
+        return new KSAction(() => outcome);
     }
 
     public static ActiveSelector activeSelector(params Behaviour[] newChildren)

@@ -8,17 +8,10 @@ public class Behaviour
 {
     public virtual void Init()
     {
-#if KSDEBUG
-        Debug.Log("Behaviour Initialised");
-#endif
     }
 
     public virtual void Terminate(Status newStatus)
     {
-#if KSDEBUG
-        Debug.Log("Behaviour Terminated");
-#endif
-
         status = newStatus;
     }
 

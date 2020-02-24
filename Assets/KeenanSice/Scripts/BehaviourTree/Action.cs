@@ -5,15 +5,12 @@ using UnityEngine;
 
 public class KSAction : Behaviour
 {
-    protected Action actionMethod;
+    protected Func<bool> actionMethod;
 
-    protected Action successBehaviour, failureBehaviour;
-
-    public KSAction(Action method) => actionMethod = method;
+    public KSAction(Func<bool> method) => actionMethod = method;
 
     public override Status Update()
     {
-        actionMethod();
-        return Status.Success;
+        return actionMethod() ? Status.Success : Status.Failure;
     }
 }

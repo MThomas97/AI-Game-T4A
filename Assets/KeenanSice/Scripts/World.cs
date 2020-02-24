@@ -200,6 +200,7 @@ public class World : MonoBehaviour
         else if(newTile is AmmoTile)
         {
             newTile.mTileObject.layer = 8; //No Range Layer.
+            newTile.mTileObject.AddComponent<AmmoPickup>();
         }
 
         worldTiles.Add(new Vector2Int(x,y), newTile);

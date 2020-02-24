@@ -93,12 +93,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4586ee74c060df489f132567d7c9316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ammoCount: 30
+  ammoCount: 5
   rotationSpeed: 200
   teamNumber: -1
-  fieldOfView: 360
-  attackRange: 10
-  reactionTime: 1
+  fieldOfView: 90
+  attackRange: 3
+  reactionTime: 0.1
+  movementSpeed: 6
+  attackDamage: 10
+  attackSpeed: 0.2
 --- !u!114 &4616702162236567699
 MonoBehaviour:
   m_ObjectHideFlags: 0
