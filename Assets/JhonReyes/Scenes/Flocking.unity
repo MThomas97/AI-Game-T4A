@@ -151,10 +151,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 9093157825900653073, guid: 961f16a7a095f154fbbfc696b1536e42,
     type: 3}
-  behavior: {fileID: 11400000, guid: 17034c36b4f9e0b4f914f3aa46e5ccab, type: 2}
-  startingCount: 67
+  behavior: {fileID: 11400000, guid: 8532d6646035c4c4fa3f1d7824154d6a, type: 2}
+  startingCount: 350
   driveFactor: 10
-  maxSpeed: 5
+  maxSpeed: 8.5
   neighborRadius: 1.5
   avoidanceRadiusMultiplier: 0.5
 --- !u!4 &442531926
@@ -207,7 +207,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.38487893, g: 0.5695588, b: 0.8773585, a: 0}
+  m_BackGroundColor: {r: 0.88554645, g: 0.90712535, b: 0.9433962, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -248,7 +248,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744229438}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.9, y: -0.4, z: -15.94}
+  m_LocalPosition: {x: 0.9, y: -0.4, z: -21.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
