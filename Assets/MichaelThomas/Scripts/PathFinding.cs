@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 using System;
+using System.Threading;
 
 public static class PathFinding
 {
@@ -11,6 +12,8 @@ public static class PathFinding
 
 	public static bool DebugCorners = true;
 	public static bool ToggleHeapOptimisation = true;
+
+	private static volatile bool isDone = false;
 
 	private static List<Node> GetNeighbours(Node currentNode)
     {
@@ -66,18 +69,29 @@ public static class PathFinding
 		return MOVE_DIAGONAL_COST * distX + MOVE_STRIAGHT_COST * (distY - distX);
 	}
 
-    public static Node CalculatePath(Vector3 startPos, Vector3 targetPos, out string output)
-    {
-        return CalculatePath(new Vector2Int(Mathf.RoundToInt(startPos.x), Mathf.RoundToInt(startPos.y)), new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y)), out output);
-    }
-
-    public static Node CalculatePath(Vector2Int startPos, Vector2Int targetPos, out string output)
+	public static bool PathComplete()
 	{
-        return ToggleHeapOptimisation ? CalculateOptimisedPath(startPos, targetPos, out output) : CalculateSlowPath(startPos, targetPos, out output);
+		if (isDone)
+			return true;
+		else
+			return false;
 	}
 
+    public static Node CalculatePath(Vector3 startPos, Vector3 targetPos, out string output)
+    { // Get multi threading working so it returns a node
+		Vector2Int ConvertStartPos = new Vector2Int(Mathf.RoundToInt(startPos.x), Mathf.RoundToInt(startPos.y));
+		Vector2Int ConvertTargetPos = new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y));
 
-	private static Node CalculateSlowPath(Vector2Int startPos, Vector2Int targetPos, out string output)
+		ThreadQueuer.GetInstance().RequestPathFind(ConvertStartPos, ConvertTargetPos, "test for now");
+		return CalculatePath(new Vector2Int(Mathf.RoundToInt(startPos.x), Mathf.RoundToInt(startPos.y)), new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y)), out output);
+	}
+
+    public static Node CalculatePath(Vector2Int startPos, Vector2Int targetPos, out string output, bool pathDone = false)
+	{
+		return ToggleHeapOptimisation ? CalculateOptimisedPath(startPos, targetPos, out output) : CalculateSlowPath(startPos, targetPos, out output);
+    }
+
+    private static Node CalculateSlowPath(Vector2Int startPos, Vector2Int targetPos, out string output)
 	{
         output = "";
 
@@ -243,8 +257,6 @@ public static class PathFinding
 
 	static Node SimplifyPath(Node path)
 	{
-		List<Vector2Int> waypoints = new List<Vector2Int>();
-
         Node currentNode = path;
 
 		while (currentNode != null && currentNode.parent != null && currentNode.parent.parent != null)
@@ -260,6 +272,6 @@ public static class PathFinding
 			}
             currentNode = currentNode.parent;
 		}
-        return path;
+		return path;
 	}
 }
