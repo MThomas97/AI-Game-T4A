@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using static BehaviourTreeHelperFunctions;
 
@@ -168,11 +169,28 @@ public class AgentBehaviour : MonoBehaviour
     void SetTarget(GameObject target, bool isPatrolTarget = false)
     {
         string outDebugString = "";
+        Vector3 position = transform.position;
+        Vector3 targetPosition;
+
+        if (target == null)
+            targetPosition = Vector3.zero;
+        else
+            targetPosition = target.transform.position;
 
         if (target != targetObject)
         {
-            targetNode = target == null ? null : PathFinding.CalculatePath(transform.position, target.transform.position, out outDebugString);
-            targetNode = targetNode != null ? targetNode.parent : targetNode;
+
+            //targetNode = target == null ? null : PathFinding.CalculatePath(transform.position, target.transform.position, out outDebugString);
+            //targetNode = targetNode != null ? targetNode.parent : targetNode;
+            ThreadStart newThread = delegate
+            {
+                targetNode = target == null ? null : PathFinding.CalculatePath(position, targetPosition, out outDebugString);
+                targetNode = targetNode != null ? targetNode.parent : targetNode;
+
+            };
+
+            Thread backgroundThread = new Thread(newThread);
+            backgroundThread.Start();
         }
         else if (targetNode != null && Vector3.Distance(transform.position, targetNode.GetVector3Position()) < 0.1f)
         {
