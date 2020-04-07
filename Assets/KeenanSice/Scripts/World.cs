@@ -77,8 +77,10 @@ public class World : MonoBehaviour
     public static List<SpawnpointTile> spawnpointTiles = new List<SpawnpointTile>();
     public static List<HealthTile> healthTiles = new List<HealthTile>();
     public static List<AmmoTile> ammoTiles = new List<AmmoTile>();
-    public static List<AgentController> agents = new List<AgentController>();
+    public static List<Controller> agents = new List<Controller>();
     public int WorldSize;
+
+    public int totalHumanPlayers = 1;
 
     void Start()
     {
@@ -110,8 +112,22 @@ public class World : MonoBehaviour
                     agent.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
                     agent.GetComponent<SpriteRenderer>().color = playerColours[i];
-                    agent.GetComponent<AgentController>().teamNumber = i;
-                    agents.Add(agent.GetComponent<AgentController>());
+
+                    bool isHuman = (x == 0 && i < totalHumanPlayers);
+
+                    Controller controller = null;
+
+                    if (isHuman)
+                    {
+                        controller = agent.AddComponent<PlayerController>();
+                    }
+                    else
+                    {
+                        controller = agent.AddComponent<AgentController>();
+                    }
+
+                    controller.teamNumber = i;
+                    agents.Add(controller);
                 }
             }
         }

@@ -78,11 +78,7 @@ public static class PathFinding
 	}
 
     public static Node CalculatePath(Vector3 startPos, Vector3 targetPos, out string output)
-    { // Get multi threading working so it returns a node
-		Vector2Int ConvertStartPos = new Vector2Int(Mathf.RoundToInt(startPos.x), Mathf.RoundToInt(startPos.y));
-		Vector2Int ConvertTargetPos = new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y));
-
-		ThreadQueuer.GetInstance().RequestPathFind(ConvertStartPos, ConvertTargetPos, "test for now");
+    {
 		return CalculatePath(new Vector2Int(Mathf.RoundToInt(startPos.x), Mathf.RoundToInt(startPos.y)), new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y)), out output);
 	}
 

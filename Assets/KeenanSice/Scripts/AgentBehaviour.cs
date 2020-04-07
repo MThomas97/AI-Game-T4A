@@ -31,16 +31,16 @@ public class AgentBehaviour : MonoBehaviour
                                 action(AttackAgent),
                                 action(PickupCollectable),
                                 action(PatrolToNextTarget)
-                            ),                      
+                            ),
                             //IsFacingTarget - false
-                            action(RotateTowards)                        
+                            action(RotateTowards)
                         ),
                         condition(IsFacingTarget,
                             //IsFacingTarget - true
                             action(MoveForward),
                             //IsFacingTarget - false
                             action(RotateTowards)
-                        )                              
+                        )
                     ),
                     action()
                 )
@@ -69,16 +69,17 @@ public class AgentBehaviour : MonoBehaviour
 
     bool patrolling = false;
 
+    const int layerMask = ~(1<<10);
 
     bool AttackAgent()
     {
         if (targetObject != null)
         {
-            AgentController ac = targetObject.GetComponent<AgentController>();
+            Controller tc = targetObject.GetComponent<Controller>();
 
-            if (ac != null)
+            if (tc != null)
             {
-                agentController.Attack(ac);
+                agentController.Attack(tc);
                 return true;
             }
         }
@@ -203,7 +204,7 @@ public class AgentBehaviour : MonoBehaviour
         }
         else if (targetNode != null && targetNode.parent == null)
         {
-            RaycastHit2D hit = Physics2D.Linecast(transform.position, targetNode.GetVector3Position());
+            RaycastHit2D hit = Physics2D.Linecast(transform.position, targetNode.GetVector3Position(), layerMask);
             if (hit.collider != null) return false;
             return (Vector3.Distance(transform.position, targetNode.GetVector3Position()) < agentController.attackRange);
         }
@@ -216,7 +217,7 @@ public class AgentBehaviour : MonoBehaviour
         float closestDistance = -1.0f;
         GameObject target = null;
 
-        foreach (AgentController enemy in World.agents)
+        foreach (Controller enemy in World.agents)
         {
             if (enemy.teamNumber == agentController.teamNumber || enemy == null) continue;
 
@@ -228,7 +229,7 @@ public class AgentBehaviour : MonoBehaviour
             if (distance < closestDistance || closestDistance < 0)
             {
                 //If we hit a collider trying to cast to the enemy, we technically can't see them, so ignore them. Most expensive check so left till last.
-                RaycastHit2D hit = Physics2D.Linecast(transform.position, enemy.transform.position);
+                RaycastHit2D hit = Physics2D.Linecast(transform.position, enemy.transform.position, layerMask);
                 if (hit.collider != null) continue;
 
                 closestDistance = distance;
@@ -291,6 +292,7 @@ public class AgentBehaviour : MonoBehaviour
     bool MoveForward()
     {
         transform.localPosition += transform.right * Time.deltaTime * agentController.movementSpeed;
+
         return true;
     }
 

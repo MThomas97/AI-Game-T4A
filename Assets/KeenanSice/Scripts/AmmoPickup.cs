@@ -6,7 +6,7 @@ public class AmmoPickup : BasePickup
 {
     const int ammoAmount = 5;
 
-    public override void Pickup(AgentController instigator)
+    public override void Pickup(Controller instigator)
     {
         if (IsPickupActive())
         {

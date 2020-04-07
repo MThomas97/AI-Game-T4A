@@ -15,7 +15,7 @@ public class BasePickup : MonoBehaviour
         return (!(pickupTimer > 0.0f));
     }
 
-    public virtual void Pickup(AgentController instigator)
+    public virtual void Pickup(Controller instigator)
     {
         pickupTimer = pickupTimerAmount;
     }

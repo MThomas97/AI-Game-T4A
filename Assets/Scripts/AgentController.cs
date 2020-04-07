@@ -5,23 +5,11 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(AgentBehaviour))]
 
-public class AgentController : MonoBehaviour
+public class AgentController : Controller
 {
-    public int ammoCount = 30;
-    int health = 100;
-
-    public float rotationSpeed = 80.0f;
-    public int teamNumber = -1;
-    public float fieldOfView = 90.0f;
-    public float attackRange = 20.0f;
-    public float reactionTime = 5.0f;
-    public float movementSpeed = 1.0f;
-
-    public int attackDamage = 10;
-
-    public float attackSpeed = 0.5f;
-    private float attackSpeedTimer = 0.0f;
-
+    public float fieldOfView { get; } = 180.0f;
+    public float attackRange { get; } = 10.0f;
+    public float reactionTime { get; } = 0.1f;
 
     //Debugging
     Text onScreenDebug;
@@ -33,55 +21,16 @@ public class AgentController : MonoBehaviour
         float timeSawAt;
     }
 
-    public bool HasAmmo()
-    {
-        return ammoCount > 0;
-    }
-
-    public int GetHealth()
-    {
-        return health; 
-    }
-
     // Start is called before the first frame update
-    void Start()
+    protected new void Start()
     {
+        base.Start();
+
         if (OnScreenDebug.pathfindingDebugs.Length > teamNumber)
         {
             onScreenDebug = OnScreenDebug.pathfindingDebugs[teamNumber];
             onScreenDebug.color = World.playerColours[teamNumber];
         }
-    }
-
-    private void Update()
-    {
-        if (attackSpeedTimer > 0.0f)
-        {
-            attackSpeedTimer -= Time.deltaTime;
-        }
-    }
-
-    public void Attack(AgentController attackee)
-    {
-        if (!(attackSpeedTimer > 0.0f) && HasAmmo())
-        {
-            attackee.Damage(this, attackDamage);
-            ammoCount -= 1;
-            attackSpeedTimer = attackSpeed;
-        }
-    }
-
-    void Damage(AgentController attacker, int amount)
-    {
-        health -= amount;
-
-        //Temporary
-        if (health <= 0) Destroy(transform.gameObject);
-    }
-
-    public void Pickup(BasePickup pickup)
-    {
-        pickup.Pickup(this);
     }
 
     public void UpdatePathfindingDebug(Node debugPath, string debugString)
@@ -92,11 +41,6 @@ public class AgentController : MonoBehaviour
         {
             onScreenDebug.text = debugString;
         }
-    }
-
-    public void GiveAmmo(int amount)
-    {
-        ammoCount += amount;
     }
 
     void OnDrawGizmos()
