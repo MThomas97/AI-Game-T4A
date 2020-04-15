@@ -9,8 +9,11 @@ public class KSAction : Behaviour
 
     public KSAction(Func<bool> method) => actionMethod = method;
 
-    public override Status Update()
+    public override Status Update(ref string outDebug, int branchDepth)
     {
+        outDebug = outDebug.Remove(outDebug.Length - 1);
+        outDebug += "(" + actionMethod.Method.Name + ")\n";
+
         return actionMethod() ? Status.Success : Status.Failure;
     }
 }

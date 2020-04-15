@@ -9,11 +9,11 @@ public class Repeat : Decorator
     protected int counter = 0;
     protected int counterLimit;
 
-    public override Status Update()
+    public override Status Update(ref string outDebug, int branchDepth)
     {
         while (true)
         {
-            child.Tick();
+            child.Tick(ref outDebug, branchDepth);
 
             if (child.GetStatus() == Status.Running)
             {

@@ -14,8 +14,9 @@ public class AgentBehaviour : MonoBehaviour
                 action(CheckResetTargetTimer),
                 condition(agentController.HasAmmo,
                     //HasAmmo - true
-                    condition(SetTargetToEnemyInSight,
-                        action(),
+                    selector(
+                        action(SetTargetToEnemyInSight),
+                        action(SetTargetToLastEnemySeen),
                         action(StartPatrol)
                     ),
                     //HasAmmo - false
@@ -56,9 +57,21 @@ public class AgentBehaviour : MonoBehaviour
 
     void Update()
     {
-        bt.Tick();
+        debugOutput = "";
+        bt.Tick(ref debugOutput, 0);
     }
 
+    void OnGUI()
+    {
+        float heightOffset = (Screen.height / (float)World.agents.Count) * agentController.teamNumber;
+        GUI.contentColor = World.playerColours[agentController.teamNumber];
+        GUI.Label(new Rect(10, heightOffset, heightOffset, Screen.width * 0.5f), debugOutput);
+    }
+
+
+    string debugOutput = "Debug";
+
+    public GameObject lastValidTargetObject = null;
 
     public Node targetNode = null;
     public GameObject targetObject = null;
@@ -70,6 +83,8 @@ public class AgentBehaviour : MonoBehaviour
     bool patrolling = false;
 
     const int layerMask = ~(1<<10);
+
+
 
     bool AttackAgent()
     {
@@ -139,8 +154,6 @@ public class AgentBehaviour : MonoBehaviour
             }
         }
 
-        Debug.Log("AMMO");
-
         GameObject target = null;
 
         if (World.ammoTiles.Count > 0)
@@ -172,6 +185,7 @@ public class AgentBehaviour : MonoBehaviour
 
         if (target != targetObject)
         {
+            lastValidTargetObject = target != null && target.GetComponent<Controller>() ? target : lastValidTargetObject;
             targetNode = target == null ? null : PathFinding.CalculatePath(transform.position, target.transform.position, out outDebugString);
             targetNode = targetNode != null ? targetNode.parent : targetNode;
         }
@@ -183,8 +197,20 @@ public class AgentBehaviour : MonoBehaviour
         agentController.UpdatePathfindingDebug(targetNode, outDebugString);
 
         targetObject = target;
-        if (target == null) targetNode = null;
+        targetNode = target == null ? null : targetNode;
+
         patrolling = isPatrolTarget;
+    }
+
+    bool SetTargetToLastEnemySeen()
+    {
+        if (lastValidTargetObject)
+        {
+            SetTarget(lastValidTargetObject);
+            return true;
+        }
+
+        return false;
     }
 
     bool IsTargetInRange()

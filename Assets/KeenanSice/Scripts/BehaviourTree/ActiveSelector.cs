@@ -16,13 +16,13 @@ public class ActiveSelector : Selector
         children.Add(action);
     }
 
-    public override Status Update()
+    public override Status Update(ref string outDebug, int branchDepth)
     {
         List<Behaviour>.Enumerator prevChild = currentChild;
 
         base.Init();
 
-        Status result = base.Update();
+        Status result = base.Update(ref outDebug, branchDepth);
 
         if(currentChild.Current != children[children.Count-1] && currentChild.Current != prevChild.Current)
         {

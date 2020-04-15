@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {
-    public int ammoCount { get; protected set; } = 30;
+    public int ammoCount { get; protected set; } = 5;
     public int health { get; protected set; } = 100;
 
     public float movementSpeed { get; } = 6.0f;

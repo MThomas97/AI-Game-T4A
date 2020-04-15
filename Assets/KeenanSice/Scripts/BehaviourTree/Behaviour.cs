@@ -15,14 +15,21 @@ public class Behaviour
         status = newStatus;
     }
 
-    public Status Tick()
+    public Status Tick(ref string outDebug, int branchDepth)
     {
         if (status != Status.Running)
         {
             Init();
         }
 
-        status = Update();
+        if (branchDepth > 0)
+        {
+            outDebug += new string(' ', branchDepth * 2) + "⌞";
+        }
+
+        outDebug += ToString() + "\n";
+
+        status = Update(ref outDebug, ++branchDepth);
 
         if (status != Status.Running)
         {
@@ -32,7 +39,7 @@ public class Behaviour
         return status;
     }
 
-    public virtual Status Update()
+    public virtual Status Update(ref string outDebug, int branchDepth)
     {
         return Status.Invalid;
     }

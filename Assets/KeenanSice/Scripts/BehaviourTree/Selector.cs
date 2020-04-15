@@ -15,7 +15,7 @@ public class Selector : Composite
         currentChild.MoveNext();
     }
 
-    public override Status Update()
+    public override Status Update(ref string outDebug, int branchDepth)
     {
         if (currentChild.Current == null)
         {
@@ -26,7 +26,7 @@ public class Selector : Composite
 
         while (true)
         {
-            Status status = currentChild.Current.Tick();
+            Status status = currentChild.Current.Tick(ref outDebug, branchDepth);
 
             if (status != Status.Failure)
             {

@@ -16,15 +16,18 @@ public class Condition : Behaviour
         failureBehaviour = newFailureBehaviour;
     }
 
-    public override Status Update()
+    public override Status Update(ref string outDebug, int branchDepth)
     {
+        outDebug = outDebug.Remove(outDebug.Length - 1);
+        outDebug += "(" + conditionMethod.Method.Name + ")\n";
+
         if (conditionMethod())
         {
-            successBehaviour.Tick();
+            successBehaviour.Tick(ref outDebug, branchDepth);
         }
         else
         {
-            failureBehaviour.Tick();
+            failureBehaviour.Tick(ref outDebug, branchDepth);
         }
 
         return Status.Success;

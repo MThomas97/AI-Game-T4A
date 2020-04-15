@@ -8,9 +8,9 @@ public class BehaviourTree
 
     public BehaviourTree(Behaviour newRoot) => root = newRoot;
 
-    public void Tick()
+    public void Tick(ref string outDebug, int branchDepth)
     {
-        root.Tick();
+        root.Tick(ref outDebug, branchDepth);
     }
 
     public void SetRoot(Behaviour newRoot)

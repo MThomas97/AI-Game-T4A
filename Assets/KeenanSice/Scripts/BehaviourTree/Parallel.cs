@@ -12,7 +12,7 @@ public class Parallel : Composite
         failurePolicy = failure;
     }
 
-    public override Status Update()
+    public override Status Update(ref string outDebug, int branchDepth)
     {
         int successCount = 0, failureCount = 0;
 
@@ -20,7 +20,7 @@ public class Parallel : Composite
         {
             if (!child.IsTerminated())
             {
-                child.Tick();
+                child.Tick(ref outDebug, branchDepth);
             }
 
             if(child.GetStatus() == Status.Success)
