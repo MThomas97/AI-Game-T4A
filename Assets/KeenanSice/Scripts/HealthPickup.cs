@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AmmoPickup : BasePickup
+public class HealthPickup : BasePickup
 {
-    const int ammoAmount = 5;
-
     public override bool Pickup(Controller instigator)
     {
         if (base.Pickup(instigator))
         {
-            instigator.GiveAmmo(ammoAmount);
+            instigator.SetHealth(instigator.healthMax);
             return true;
         }
 

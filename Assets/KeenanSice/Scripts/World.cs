@@ -27,7 +27,17 @@ public class WalkableTile : WorldTile
     }
 };
 
-public class HealthTile : WalkableTile
+public class PickupTile : WalkableTile
+{
+    public BasePickup pickupComponent;
+
+    public bool Pickup(Controller instigator)
+    {
+        return pickupComponent.Pickup(instigator);
+    }
+}
+
+public class HealthTile : PickupTile
 {
     public HealthTile()
     {
@@ -35,7 +45,7 @@ public class HealthTile : WalkableTile
     }
 }
 
-public class AmmoTile : WalkableTile
+public class AmmoTile : PickupTile
 {
     public AmmoTile()
     {
@@ -81,6 +91,8 @@ public class World : MonoBehaviour
     public int WorldSize;
 
     public int totalHumanPlayers = 1;
+
+    public const int enemyAttackLayerMask = ~(1 << 10);
 
     void Start()
     {
@@ -219,9 +231,18 @@ public class World : MonoBehaviour
             newTile.mTileObject.layer = 8; //No Range Layer.
         }
 
-        if (newTile is AmmoTile)
+        if (newTile is PickupTile)
         {
-            newTile.mTileObject.AddComponent<AmmoPickup>();
+            PickupTile pickupTile = newTile as PickupTile;
+
+            if (newTile is AmmoTile)
+            {
+                pickupTile.pickupComponent = newTile.mTileObject.AddComponent<AmmoPickup>();
+            }
+            else if(newTile is HealthTile)
+            {
+                pickupTile.pickupComponent = newTile.mTileObject.AddComponent<HealthPickup>();
+            }
         }
 
         worldTiles.Add(new Vector2Int(x,y), newTile);

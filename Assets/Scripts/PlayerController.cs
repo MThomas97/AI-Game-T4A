@@ -38,6 +38,17 @@ public class PlayerController : Controller
         {
             Move(new Vector2(horizontalAxis, verticalAxis));
         }
+
+        if(Input.GetButton("Fire_" + teamNumber))
+        {
+            if (HasAmmo())
+            {
+                TryAttack();
+            }
+
+            TryPickup();
+          
+        }
     }
 
     void Move(Vector2 movement)
@@ -51,4 +62,59 @@ public class PlayerController : Controller
         transform.rotation = Quaternion.RotateTowards(transform.rotation, quart, Time.deltaTime * rotationSpeed);
     }
 
+    bool TryAttack()
+    {
+        foreach (Controller enemy in World.agents)
+        {
+            if (enemy == null || enemy.teamNumber == teamNumber) continue;
+
+            if (Vector3.Distance(enemy.transform.position, transform.position) > attackRange) continue;
+   
+            Vector3 enemyDir = Vector3.Normalize(enemy.transform.position - transform.position);
+            float angle = Vector3.Angle(transform.right, enemyDir);
+            if (angle > attackAngle * 0.5f) continue;
+
+            Attack(enemy);
+            return true;
+        }
+        return false;
+    }
+
+    void TryPickup()
+    {
+        TryPickupAmmo();
+        TryPickupHealth();
+    }
+
+    void TryPickupAmmo()
+    {
+        if (!HasFullAmmo())
+        {
+            foreach (AmmoTile ammo in World.ammoTiles)
+            {
+                if(TryPickupBase(ammo)) return;
+            }
+        }
+    }
+
+    void TryPickupHealth()
+    {
+        if (!IsFullHealth())
+        {
+            foreach (HealthTile healthTile in World.healthTiles)
+            {
+                if (TryPickupBase(healthTile)) return;
+            }
+        }
+    }
+
+    bool TryPickupBase(PickupTile pickupTile)
+    {
+        if (Vector3.Distance(pickupTile.mTileObject.transform.position, transform.position) < pickupRange)
+        {
+            return pickupTile.Pickup(this);
+        }
+
+        return false;
+    }
 }

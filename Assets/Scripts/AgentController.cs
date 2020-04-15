@@ -8,7 +8,6 @@ using UnityEngine.UI;
 public class AgentController : Controller
 {
     public float fieldOfView { get; } = 180.0f;
-    public float attackRange { get; } = 10.0f;
     public float reactionTime { get; } = 0.1f;
 
     //Debugging

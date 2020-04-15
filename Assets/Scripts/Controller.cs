@@ -6,8 +6,10 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {
-    public int ammoCount { get; protected set; } = 5;
-    public int health { get; protected set; } = 100;
+    public int ammo { get; protected set; } = 0;
+    public int ammoMax { get; } = 5;
+    public int healthMax { get; } = 100;
+    public int health { get; protected set; } = 0;
 
     public float movementSpeed { get; } = 6.0f;
 
@@ -17,6 +19,11 @@ public class Controller : MonoBehaviour
 
     public float rotationSpeed { get; } = 600.0f;
     public int teamNumber = -1;
+
+    public float attackRange { get; } = 10.0f;
+    public float attackAngle { get; } = 45.0f;
+
+    public float pickupRange { get; } = 1.0f;
 
     LineRenderer lr = null;
     const float laserLineLifeLength = 1.0f;
@@ -28,11 +35,29 @@ public class Controller : MonoBehaviour
         lr.widthMultiplier = 0.25f;
         lr.material = new Material(Shader.Find("Unlit/Color"));
         lr.material.color = World.playerColours[teamNumber];
+        SetHealth(healthMax);
+        ammo = ammoMax;
     }
 
     public bool HasAmmo()
     {
-        return ammoCount > 0;
+        return ammo > 0;
+    }
+
+    public bool HasFullAmmo()
+    {
+        return ammo >= ammoMax; 
+    }
+
+    public void SetHealth(int newHealth)
+    {
+        health = newHealth;
+        if (health <= 0) Destroy(transform.gameObject);
+    }
+
+    public bool IsFullHealth()
+    {
+        return health >= healthMax;
     }
 
     protected void Update()
@@ -57,22 +82,27 @@ public class Controller : MonoBehaviour
     {
         if (!(attackSpeedTimer > 0.0f) && HasAmmo())
         {
-            attackee.Damage(this, attackDamage);
-            ammoCount -= 1;
+            ammo -= 1;
             attackSpeedTimer = attackSpeed;
 
+            RaycastHit2D hit = Physics2D.Linecast(transform.position, attackee.transform.position, World.enemyAttackLayerMask);
+
+            Vector3 hitPoint = hit ? new Vector3(hit.point.x, hit.point.y, 0) : attackee.transform.position;
+
             lr.positionCount = 2;
-            lr.SetPositions(new Vector3[2] { transform.position, attackee.transform.position });
+            lr.SetPositions(new Vector3[2] { transform.position, hitPoint });
             laserLineResetTimer = laserLineLifeLength;
+
+            if (!hit)
+            {
+                attackee.Damage(this, attackDamage);
+            }
         }
     }
 
     public void Damage(Controller attacker, int amount)
     {
-        health -= amount;
-
-        //Temporary
-        if (health <= 0) Destroy(transform.gameObject);
+        SetHealth(health - amount);
     }
 
     public void Pickup(BasePickup pickup)
@@ -82,6 +112,6 @@ public class Controller : MonoBehaviour
 
     public void GiveAmmo(int amount)
     {
-        ammoCount += amount;
+        ammo = Mathf.Min(ammo + amount, ammoMax);
     }
 }

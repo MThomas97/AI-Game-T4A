@@ -15,9 +15,16 @@ public class BasePickup : MonoBehaviour
         return (!(pickupTimer > 0.0f));
     }
 
-    public virtual void Pickup(Controller instigator)
+    public virtual bool Pickup(Controller instigator)
     {
-        pickupTimer = pickupTimerAmount;
+        if (IsPickupActive())
+        {
+            pickupTimer = pickupTimerAmount;
+
+            return true;
+        }
+
+        return false;
     }
 
     private void Start()

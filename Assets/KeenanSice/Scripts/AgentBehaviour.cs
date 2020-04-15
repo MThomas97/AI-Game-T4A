@@ -65,7 +65,7 @@ public class AgentBehaviour : MonoBehaviour
     {
         float heightOffset = (Screen.height / (float)World.agents.Count) * agentController.teamNumber;
         GUI.contentColor = World.playerColours[agentController.teamNumber];
-        GUI.Label(new Rect(10, heightOffset, heightOffset, Screen.width * 0.5f), debugOutput);
+        GUI.Label(new Rect(10, heightOffset, Screen.width * 0.5f, heightOffset), debugOutput);
     }
 
 
@@ -81,9 +81,6 @@ public class AgentBehaviour : MonoBehaviour
     float reactionTimer = 0.0f;
 
     bool patrolling = false;
-
-    const int layerMask = ~(1<<10);
-
 
 
     bool AttackAgent()
@@ -163,7 +160,7 @@ public class AgentBehaviour : MonoBehaviour
             for(int i = 0; i < World.ammoTiles.Count; i++)
             {
                 //If not active skip.
-                if (!World.ammoTiles[i].mTileObject.GetComponent<AmmoPickup>().IsPickupActive()) continue;
+                if (!World.ammoTiles[i].pickupComponent.IsPickupActive()) continue;
 
                 float distance = Vector3.Distance(transform.position, World.ammoTiles[i].mTileObject.transform.position);
                 if (distance < closestDistance || closestDistance < 0.0f)
@@ -230,7 +227,7 @@ public class AgentBehaviour : MonoBehaviour
         }
         else if (targetNode != null && targetNode.parent == null)
         {
-            RaycastHit2D hit = Physics2D.Linecast(transform.position, targetNode.GetVector3Position(), layerMask);
+            RaycastHit2D hit = Physics2D.Linecast(transform.position, targetNode.GetVector3Position(), World.enemyAttackLayerMask);
             if (hit.collider != null) return false;
             return (Vector3.Distance(transform.position, targetNode.GetVector3Position()) < agentController.attackRange);
         }
@@ -245,7 +242,7 @@ public class AgentBehaviour : MonoBehaviour
 
         foreach (Controller enemy in World.agents)
         {
-            if (enemy.teamNumber == agentController.teamNumber || enemy == null) continue;
+            if (enemy == null || enemy.teamNumber == agentController.teamNumber) continue;
 
             Vector3 enemyDir = Vector3.Normalize(enemy.transform.position - transform.position);
             float angle = Vector3.Angle(transform.right, enemyDir);
@@ -255,7 +252,7 @@ public class AgentBehaviour : MonoBehaviour
             if (distance < closestDistance || closestDistance < 0)
             {
                 //If we hit a collider trying to cast to the enemy, we technically can't see them, so ignore them. Most expensive check so left till last.
-                RaycastHit2D hit = Physics2D.Linecast(transform.position, enemy.transform.position, layerMask);
+                RaycastHit2D hit = Physics2D.Linecast(transform.position, enemy.transform.position, World.enemyAttackLayerMask);
                 if (hit.collider != null) continue;
 
                 closestDistance = distance;
