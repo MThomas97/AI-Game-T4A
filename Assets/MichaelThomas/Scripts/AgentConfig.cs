@@ -32,4 +32,10 @@ public class AgentConfig : MonoBehaviour
 
     //Raycasting
     public float maxRayDistance = 0.5f;
+
+    //Leader Following
+    public float LEADER_BEHIND_DIST = 0.5f;
+    public float LEADER_AHEAD_DIST = 0.5f;
+    public float LeaderSightRadius = 0.5f;
+    public float slowingRadius = 30.0f;
 }
