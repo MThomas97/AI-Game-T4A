@@ -8,6 +8,7 @@ public class Agent : MonoBehaviour
     public Quaternion rotation;
     public Vector3 velocity;
     public Vector3 acceleration;
+    public Vector3 ahead;
     public Vector3 behind;
     public GameObject leaderGameObject;
 
@@ -43,6 +44,7 @@ public class Agent : MonoBehaviour
             //RaycastCollison();
             //acceleration = CombineWander();
             acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
+            velocity = new Vector3(0, 3, 0);
             velocity = velocity + acceleration * Time.deltaTime;
             velocity = Vector3.ClampMagnitude(velocity, config.maxVelocity);
             position = position + velocity * Time.deltaTime;
@@ -52,8 +54,9 @@ public class Agent : MonoBehaviour
         }
         else
         {
-            //RaycastCollison();
-            acceleration = followLeader();
+            
+            acceleration = RaycastCollison() * config.CollisionAvoidancePriority;
+            acceleration += followLeader();
             acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
             velocity = velocity + acceleration * Time.deltaTime;
             velocity = Vector3.ClampMagnitude(velocity, config.maxVelocity);
@@ -66,36 +69,35 @@ public class Agent : MonoBehaviour
 
     }
 
-    void RaycastCollison()
+    Vector3 RaycastCollison()
     {
-        Ray2D ray2D = new Ray2D(transform.position, velocity);
-        ContactFilter2D filter;
-        filter.layerMask = 1 << 8;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.position + velocity);
+        float dynamic_length = velocity.magnitude / config.maxVelocity;
+        Vector3 aheadVelocity = transform.position + velocity.normalized * dynamic_length;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, velocity, velocity.magnitude * config.maxRayDistance);
+        Vector3 newDir = new Vector3();
 
-        int iterationCount = 6;
+        int iterationCount = 20;
         float angleMin = 180 / iterationCount;
 
         if (hit.collider != null)
         {
             Vector3 tempVelocity = velocity;
-            Debug.DrawRay(transform.position, transform.position + velocity, Color.red);
+            Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.red);
             for (int i = 0; i < iterationCount; i++)
             {
                 for (int d = -1; d < 2; d += 2)
-                {//Normalise this later on to make it more smooth
-                    velocity = (Quaternion.Euler(angleMin * i * d, 0, 0) * tempVelocity) * hit.distance;
-                    if (hit.collider == null)
-                        return;
+                {
+                    newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * velocity);
+                    if (hit.collider == null )
+                        return newDir.normalized;
                 }
             }
 
             Debug.Log("hit");
         }
-        else
-        {
-            Debug.DrawRay(transform.position, transform.position + velocity, Color.green);
-        }
+        
+        Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.green);
+        return newDir.normalized;
     }
 
     Vector3 followLeader()
@@ -106,7 +108,7 @@ public class Agent : MonoBehaviour
         //Calculate the ahead point
         Vector3.Normalize(tv);
         tv.Scale(new Vector3(config.LEADER_AHEAD_DIST, config.LEADER_AHEAD_DIST, 0));
-        Vector3 ahead = leader.position + tv;
+        ahead = leader.position + tv;
 
         //Calculate the behind point
         tv.Scale(new Vector3(config.LEADER_BEHIND_DIST, config.LEADER_BEHIND_DIST, 0));
@@ -117,13 +119,16 @@ public class Agent : MonoBehaviour
 
         force = force + Arrival(behind);
 
-        //force = force + Cohesion() * config.cohesionPriority + Alignment() * config.alignmentPriority + Separation() * config.separationPriority;
-
-        //Look at adding alignment and cohesion
-
         force = force + Separation() * config.separationPriority;
 
         return force;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        if(behind != Vector3.zero)
+            Gizmos.DrawSphere(behind, config.LEADER_BEHIND_DIST);
     }
 
     protected Vector3 Wander()
@@ -192,7 +197,7 @@ public class Agent : MonoBehaviour
 
         foreach (Agent agent in agents)
         {
-            if (isInFOV(agent.position))
+            if (isInFOV(agent.position) && !agent.isLeader)
             {
                 Vector3 movingTowards = this.position - agent.position;
                 if (movingTowards.magnitude > 0)
@@ -202,22 +207,6 @@ public class Agent : MonoBehaviour
             }
         }
         return separationVector.normalized;
-    }
-
-    Vector3 Avoidance()
-    {
-        Vector3 avoidVector = new Vector3();
-        List<Enemy> enemyList = level.GetEnemies(this, config.avoidanceRadius);
-
-        if (enemyList.Count == 0)
-            return avoidVector;
-
-        foreach (Enemy enemy in enemyList)
-        {
-            avoidVector += RunAway(enemy.position);
-        }
-
-        return avoidVector.normalized;
     }
 
     bool isOnLeaderSight(Agent leader, Vector3 leaderAhead)
@@ -258,13 +247,13 @@ public class Agent : MonoBehaviour
 
     virtual protected Vector3 CombineWander()
     {
-        Vector3 finalVec = config.cohesionPriority * Cohesion() + config.wanderPriority * Wander() + config.alignmentPriority * Alignment() + config.separationPriority * Separation() + config.avoidancePriority * Avoidance();
+        Vector3 finalVec = config.cohesionPriority * Cohesion() + config.wanderPriority * Wander() + config.alignmentPriority * Alignment() + config.separationPriority * Separation();
         return finalVec;
     }
 
     virtual protected Vector3 CombineFollow()
     {
-        Vector3 finalVec = config.cohesionPriority * Cohesion() + followLeader() + config.alignmentPriority * Alignment() + config.separationPriority * Separation() + config.avoidancePriority * Avoidance();
+        Vector3 finalVec = config.cohesionPriority * Cohesion() + followLeader() + config.alignmentPriority * Alignment() + config.separationPriority * Separation();
         return finalVec;
     }
 
