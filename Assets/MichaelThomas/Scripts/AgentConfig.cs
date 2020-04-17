@@ -8,12 +8,6 @@ public class AgentConfig : MonoBehaviour
     public float maxAcceleration;
     public float maxVelocity;
 
-    //Wander Variables
-    public float wanderJitter;
-    public float wanderRadius;
-    public float wanderDistance;
-    public float wanderPriority;
-
     //Seperation Variables
     public float separationRadius;
     public float separationPriority;

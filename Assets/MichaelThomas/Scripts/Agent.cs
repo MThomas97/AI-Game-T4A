@@ -54,8 +54,8 @@ public class Agent : MonoBehaviour
         }
         else
         {
-            
-            acceleration = RaycastCollison() * config.CollisionAvoidancePriority;
+            acceleration.x = RaycastCollison().x * config.CollisionAvoidancePriority;
+            acceleration.y = RaycastCollison().y * config.CollisionAvoidancePriority;
             acceleration += followLeader();
             acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
             velocity = velocity + acceleration * Time.deltaTime;
@@ -71,8 +71,6 @@ public class Agent : MonoBehaviour
 
     Vector3 RaycastCollison()
     {
-        float dynamic_length = velocity.magnitude / config.maxVelocity;
-        Vector3 aheadVelocity = transform.position + velocity.normalized * dynamic_length;
         RaycastHit2D hit = Physics2D.Raycast(transform.position, velocity, velocity.magnitude * config.maxRayDistance);
         Vector3 newDir = new Vector3();
 
@@ -81,19 +79,20 @@ public class Agent : MonoBehaviour
 
         if (hit.collider != null)
         {
-            Vector3 tempVelocity = velocity;
             Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.red);
             for (int i = 0; i < iterationCount; i++)
             {
                 for (int d = -1; d < 2; d += 2)
                 {
                     newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * velocity);
-                    if (hit.collider == null )
+                    if (newDir.x >= hit.collider.transform.position.x && newDir.x <= hit.collider.transform.position.x + hit.collider.transform.localScale.x && newDir.y >= hit.collider.transform.position.y && newDir.y <= hit.collider.transform.position.y + hit.collider.transform.localScale.y)
+                    {//Figure a way to exit early if a good direction is found
+                        Debug.Log("test");
                         return newDir.normalized;
+
+                    } 
                 }
             }
-
-            Debug.Log("hit");
         }
         
         Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.green);
@@ -122,25 +121,6 @@ public class Agent : MonoBehaviour
         force = force + Separation() * config.separationPriority;
 
         return force;
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        if(behind != Vector3.zero)
-            Gizmos.DrawSphere(behind, config.LEADER_BEHIND_DIST);
-    }
-
-    protected Vector3 Wander()
-    {
-        float jitter = config.wanderJitter * Time.deltaTime;
-        wanderTarget += new Vector3(RandomBinomial() * jitter, RandomBinomial() * jitter, 0);
-        wanderTarget = wanderTarget.normalized;
-        wanderTarget *= config.wanderRadius;
-        Vector3 targetInLocalSpace = wanderTarget + new Vector3(config.wanderDistance, config.wanderDistance, 0);
-        Vector3 targetInWorldSpace = transform.TransformPoint(targetInLocalSpace);
-        targetInWorldSpace -= this.position;
-        return targetInWorldSpace.normalized;
     }
 
     Vector3 Cohesion()
@@ -243,39 +223,6 @@ public class Agent : MonoBehaviour
     {
         Vector3 neededVelocity = (position - target).normalized * config.maxVelocity;
         return neededVelocity - velocity;
-    }
-
-    virtual protected Vector3 CombineWander()
-    {
-        Vector3 finalVec = config.cohesionPriority * Cohesion() + config.wanderPriority * Wander() + config.alignmentPriority * Alignment() + config.separationPriority * Separation();
-        return finalVec;
-    }
-
-    virtual protected Vector3 CombineFollow()
-    {
-        Vector3 finalVec = config.cohesionPriority * Cohesion() + followLeader() + config.alignmentPriority * Alignment() + config.separationPriority * Separation();
-        return finalVec;
-    }
-
-    void WrapAround(ref Vector3 vector, float min, float max)
-    {
-        vector.x = WrapAroundFloat(vector.x, min, max);
-        vector.y = WrapAroundFloat(vector.y, min, max);
-        vector.z = WrapAroundFloat(vector.z, min, max);
-    }
-
-    float WrapAroundFloat(float value, float min, float max)
-    {
-        if (value > max)
-            value = min;
-        else if (value < min)
-            value = max;
-        return value;
-    }
-
-    float RandomBinomial()
-    {
-        return Random.Range(0f, 1f) - Random.Range(0f, 1f);
     }
 
     bool isInFOV(Vector3 vec)

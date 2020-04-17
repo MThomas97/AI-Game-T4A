@@ -5,11 +5,8 @@ using UnityEngine;
 public class Level : MonoBehaviour
 {
     public Transform agentPrefab;
-    public Transform enemyPrefab;
     public int numberOfAgents;
-    public int numberOfEnemies;
     public List<Agent> agents;
-    public List<Enemy> enemies;
     public float bounds;
     public float spawnRadius;
 
@@ -17,13 +14,10 @@ public class Level : MonoBehaviour
     void Start()
     {
         agents = new List<Agent>();
-        enemies = new List<Enemy>();
 
         Spawn(agentPrefab, numberOfAgents);
-        Spawn(enemyPrefab, numberOfEnemies);
 
         agents.AddRange(FindObjectsOfType<Agent>());
-        enemies.AddRange(FindObjectsOfType<Enemy>());
     }
 
     void Spawn(Transform prefab, int Count)
@@ -50,19 +44,5 @@ public class Level : MonoBehaviour
         }
 
         return neighboursFound;
-    }
-
-    public List<Enemy> GetEnemies(Agent agent, float radius)
-    {
-        List<Enemy> returnEnemies = new List<Enemy>();
-
-        foreach(Enemy enemy in enemies)
-        {
-            if(Vector3.Distance(agent.position, enemy.position) <= radius)
-            {
-                returnEnemies.Add(enemy);
-            }
-        }
-        return returnEnemies;
     }
 }
