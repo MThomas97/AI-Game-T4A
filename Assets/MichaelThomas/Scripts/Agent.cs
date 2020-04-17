@@ -34,34 +34,29 @@ public class Agent : MonoBehaviour
         
         position = transform.position;
         rotation = transform.rotation;
-        velocity = new Vector3(Random.Range(-3, 3), Random.Range(-3, 3), 0);
+        velocity = new Vector3();
     }
 
     void FixedUpdate()
     {
         if (isLeader)
         {
-            //RaycastCollison();
-            //acceleration = CombineWander();
             acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
             velocity = new Vector3(0, 3, 0);
             velocity = velocity + acceleration * Time.deltaTime;
             velocity = Vector3.ClampMagnitude(velocity, config.maxVelocity);
             position = position + velocity * Time.deltaTime;
-            ////WrapAround(ref position, -level.bounds, level.bounds);
             transform.position = position;
             transform.rotation = rotation;
         }
         else
         {
-            acceleration.x = RaycastCollison().x * config.CollisionAvoidancePriority;
-            acceleration.y = RaycastCollison().y * config.CollisionAvoidancePriority;
-            acceleration += followLeader();
+            acceleration = followLeader();
+            RaycastCollison();
             acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
             velocity = velocity + acceleration * Time.deltaTime;
             velocity = Vector3.ClampMagnitude(velocity, config.maxVelocity);
             position = position + velocity * Time.deltaTime;
-            //WrapAround(ref position, -level.bounds, level.bounds);
             transform.position = position;
             transform.rotation = rotation;
 
@@ -69,34 +64,88 @@ public class Agent : MonoBehaviour
 
     }
 
-    Vector3 RaycastCollison()
+    void RaycastCollison()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, velocity, velocity.magnitude * config.maxRayDistance);
+        Vector3 leftSensorDir = Quaternion.Euler(90, 180, 0) * new Vector3(1, 1, 0) + velocity;
+        Vector3 RightSensorDir = Quaternion.Euler(180, 20, 0) * new Vector3(1, 1, 0) + velocity;
+        leftSensorDir.z = 0;
+        RightSensorDir.z = 0;
+        RaycastHit2D centreHit = Physics2D.Raycast(transform.position, velocity, velocity.magnitude * config.maxRayDistance);
+        RaycastHit2D LeftHit = Physics2D.Raycast(transform.position, leftSensorDir, velocity.magnitude * config.maxRayDistance);
+        RaycastHit2D RightHit = Physics2D.Raycast(transform.position, RightSensorDir, velocity.magnitude * config.maxRayDistance);
         Vector3 newDir = new Vector3();
-
-        int iterationCount = 20;
+        int iterationCount = 6;
         float angleMin = 180 / iterationCount;
 
-        if (hit.collider != null)
+        if (centreHit.collider)
         {
-            Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.red);
-            for (int i = 0; i < iterationCount; i++)
+            for (int i = 1; i <= iterationCount; i++)
             {
                 for (int d = -1; d < 2; d += 2)
                 {
-                    newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * velocity);
-                    if (newDir.x >= hit.collider.transform.position.x && newDir.x <= hit.collider.transform.position.x + hit.collider.transform.localScale.x && newDir.y >= hit.collider.transform.position.y && newDir.y <= hit.collider.transform.position.y + hit.collider.transform.localScale.y)
-                    {//Figure a way to exit early if a good direction is found
-                        Debug.Log("test");
-                        return newDir.normalized;
-
-                    } 
+                    if(0 > d)
+                        newDir = (Quaternion.Euler(0, angleMin * i * d, 0) * velocity);
+                    else
+                        newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * velocity);
+       
+                    if(!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * config.maxRayDistance))
+                    {
+                        Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.green);
+                        newDir.z = 0;
+                        velocity = newDir.normalized * (config.CollisionAvoidancePriority / centreHit.distance);
+                        return;
+                    }
+                    Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.red);
                 }
             }
         }
-        
-        Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.green);
-        return newDir.normalized;
+        else if (LeftHit.collider)
+        {
+            for (int i = 1; i <= iterationCount; i++)
+            {
+                for (int d = -1; d < 2; d += 2)
+                {
+                    if (0 > d)
+                        newDir = (Quaternion.Euler(0, angleMin * i * d, 0) * leftSensorDir);
+                    else
+                        newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * leftSensorDir);
+
+                    if (!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * config.maxRayDistance))
+                    {
+                        Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.green);
+                        newDir.z = 0;
+                        velocity = newDir.normalized * (config.CollisionAvoidancePriority / LeftHit.distance);
+                        return;
+                    }
+                    Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.red);
+                }
+            }
+        }
+        else if (RightHit.collider)
+        {
+            for (int i = 1; i <= iterationCount; i++)
+            {
+                for (int d = -1; d < 2; d += 2)
+                {
+                    if (0 > d)
+                        newDir = (Quaternion.Euler(0, angleMin * i * d, 0) * leftSensorDir);
+                    else
+                        newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * leftSensorDir);
+
+                    if (!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * config.maxRayDistance))
+                    {
+                        Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.green);
+                        newDir.z = 0;
+                        velocity = newDir.normalized * (config.CollisionAvoidancePriority / RightHit.distance);
+                        return;
+                    }
+                    Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.red);
+                }
+            }
+        }
+        Debug.DrawRay(transform.position, leftSensorDir * config.maxRayDistance, Color.white);
+        Debug.DrawRay(transform.position, RightSensorDir * config.maxRayDistance, Color.white);
+        Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.white);
     }
 
     Vector3 followLeader()
