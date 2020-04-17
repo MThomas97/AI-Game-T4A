@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AgentConfig : MonoBehaviour
 {
-    public float maxFOV = 180;
+    public float maxFOV;
     public float maxAcceleration;
     public float maxVelocity;
 
@@ -26,16 +26,15 @@ public class AgentConfig : MonoBehaviour
     public float cohesionRadius;
     public float cohesionPriority;
 
-    //Avoidance Variables
-    public float avoidanceRadius;
-    public float avoidancePriority;
+    //Collision Avoidance Variables
+    public float CollisionAvoidancePriority;
 
     //Raycasting
-    public float maxRayDistance = 0.5f;
+    public float maxRayDistance;
 
     //Leader Following
-    public float LEADER_BEHIND_DIST = 0.5f;
-    public float LEADER_AHEAD_DIST = 0.5f;
-    public float LeaderSightRadius = 0.5f;
-    public float slowingRadius = 30.0f;
+    public float LEADER_BEHIND_DIST;
+    public float LEADER_AHEAD_DIST;
+    public float LeaderSightRadius;
+    public float slowingRadius;
 }
