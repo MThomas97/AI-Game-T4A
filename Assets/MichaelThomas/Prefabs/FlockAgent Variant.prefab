@@ -16,10 +16,12 @@ MonoBehaviour:
   rotation: {x: 0, y: 0, z: 0, w: 0}
   velocity: {x: 0, y: 0, z: 0}
   acceleration: {x: 0, y: 0, z: 0}
+  ahead: {x: 0, y: 0, z: 0}
   behind: {x: 0, y: 0, z: 0}
   leaderGameObject: {fileID: 0}
   level: {fileID: 0}
   config: {fileID: 0}
+  isLeader: 0
 --- !u!1001 &1862968648079800091
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -90,6 +92,7 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 4616702162236567788, guid: 798acd07ff8f00a4ea2833458422185a, type: 3}
     - {fileID: 4616702162236567699, guid: 798acd07ff8f00a4ea2833458422185a, type: 3}
+    - {fileID: -3041594630360959557, guid: 798acd07ff8f00a4ea2833458422185a, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 798acd07ff8f00a4ea2833458422185a, type: 3}
 --- !u!1 &6470346904992417673 stripped
 GameObject:
