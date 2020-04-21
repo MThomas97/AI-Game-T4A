@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class BoidConfig
 {
-    static public float maxFOV = 120;
+    static public float maxFOV = 180;
     static public float rotationSpeed = 90;
 
     //Seperation Variables
@@ -20,14 +20,14 @@ public static class BoidConfig
     static public float cohesionPriority = 1;
 
     //Collision Avoidance Variables
-    static public float CollisionAvoidancePriority = 4000;
+    static public float CollisionAvoidancePriority = 3000;
 
     //Raycasting
-    static public float maxRayDistance = 0.5f;
+    static public float maxRayDistance = 2.5f;
 
     //Leader Following
-    static public float LEADER_BEHIND_DIST = -0.5f;
-    static public float LEADER_AHEAD_DIST = 1;
+    static public float LEADER_BEHIND_DIST = -1.0f;
+    static public float LEADER_AHEAD_DIST = 1.0f;
     static public float LeaderSightRadius = 1.5f;
     static public float slowingRadius = 3;
 }

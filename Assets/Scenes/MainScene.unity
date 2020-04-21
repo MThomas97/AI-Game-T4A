@@ -236,7 +236,7 @@ MonoBehaviour:
   worldGenerationTexture: {fileID: 2800000, guid: 2ec3df8d1bb79db4ab4f16071f801e73,
     type: 3}
   perlinSeed: -1
-  totalAgentsOnATeam: 2
+  totalAgentsOnATeam: 5
   baseTileObject: {fileID: 5733350643558169301, guid: a9a1d427ac071b7478b75a5c737d0cc1,
     type: 3}
   baseAgentObject: {fileID: 4616702162236567698, guid: 798acd07ff8f00a4ea2833458422185a,
