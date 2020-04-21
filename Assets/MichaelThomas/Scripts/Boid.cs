@@ -2,33 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Agent : MonoBehaviour
+public class Boid : MonoBehaviour
 {
     public Vector3 position;
-    public Quaternion rotation;
     public Vector3 velocity;
     public Vector3 acceleration;
     public Vector3 ahead;
     public Vector3 behind;
+
+    public Quaternion rotation;
     public GameObject leaderGameObject;
 
     public Level level;
-    public AgentConfig config;
+    public BoidConfig config;
 
-    private Vector3 wanderTarget;
     public bool isLeader = false;
-    private Agent leader;
+
+    private Boid leader;
 
     private void Start()
     {
 
         level = FindObjectOfType<Level>();
-        config = FindObjectOfType<AgentConfig>();
+        config = FindObjectOfType<BoidConfig>();
 
         if (leaderGameObject == null && this.name != "Leader")
-        {
+        {//Temp for setting the leader
             leaderGameObject = GameObject.Find("Leader");
-            leader = leaderGameObject.GetComponent<Agent>();
+            leader = leaderGameObject.GetComponent<Boid>();
             leader.isLeader = true;
         }
         
@@ -40,7 +41,7 @@ public class Agent : MonoBehaviour
     void FixedUpdate()
     {
         if (isLeader)
-        {
+        { //Temporary for moving the leader change later so we can get the velocity of the leader from world script?
             acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
             velocity = new Vector3(0, 3, 0);
             velocity = velocity + acceleration * Time.deltaTime;
@@ -157,6 +158,7 @@ public class Agent : MonoBehaviour
         Vector3.Normalize(tv);
         tv.Scale(new Vector3(config.LEADER_AHEAD_DIST, config.LEADER_AHEAD_DIST, 0));
         ahead = leader.position + tv;
+        ahead = leader.position + tv;
 
         //Calculate the behind point
         tv.Scale(new Vector3(config.LEADER_BEHIND_DIST, config.LEADER_BEHIND_DIST, 0));
@@ -175,25 +177,25 @@ public class Agent : MonoBehaviour
     Vector3 Cohesion()
     {
         Vector3 cohesionVector = new Vector3();
-        int countAgents = 0;
-        List<Agent> neighbours = level.GetNeighbours(this, config.cohesionRadius);
+        int countBoids = 0;
+        List<Boid> neighbours = level.GetNeighbours(this, config.cohesionRadius);
 
         if (neighbours.Count == 0)
             return cohesionVector;
 
-        foreach (Agent agent in neighbours)
+        foreach (Boid boid in neighbours)
         {
-            if (isInFOV(agent.position))
+            if (isInFOV(boid.position))
             {
-                cohesionVector += agent.position;
-                countAgents++;
+                cohesionVector += boid.position;
+                countBoids++;
             }
         }
 
-        if (countAgents == 0)
+        if (countBoids == 0)
             return cohesionVector;
 
-        cohesionVector /= countAgents;
+        cohesionVector /= countBoids;
         cohesionVector = cohesionVector - this.position;
         cohesionVector = Vector3.Normalize(cohesionVector);
         return cohesionVector;
@@ -202,15 +204,15 @@ public class Agent : MonoBehaviour
     Vector3 Alignment()
     {
         Vector3 alignVector = new Vector3();
-        List<Agent> agents = level.GetNeighbours(this, config.alignmentRadius);
+        List<Boid> boids = level.GetNeighbours(this, config.alignmentRadius);
 
-        if (agents.Count == 0)
+        if (boids.Count == 0)
             return alignVector;
 
-        foreach (Agent agent in agents)
+        foreach (Boid boid in boids)
         {
-            if (isInFOV(agent.position))
-                alignVector += agent.velocity;
+            if (isInFOV(boid.position))
+                alignVector += boid.velocity;
         }
 
         return alignVector.normalized;
@@ -219,16 +221,16 @@ public class Agent : MonoBehaviour
     Vector3 Separation()
     {
         Vector3 separationVector = new Vector3();
-        List<Agent> agents = level.GetNeighbours(this, config.separationRadius);
+        List<Boid> boids = level.GetNeighbours(this, config.separationRadius);
 
-        if (agents.Count == 0)
+        if (boids.Count == 0)
             return separationVector;
 
-        foreach (Agent agent in agents)
+        foreach (Boid boid in boids)
         {
-            if (isInFOV(agent.position) && !agent.isLeader)
+            if (isInFOV(boid.position) && !boid.isLeader)
             {
-                Vector3 movingTowards = this.position - agent.position;
+                Vector3 movingTowards = this.position - boid.position;
                 if (movingTowards.magnitude > 0)
                 {
                     separationVector += movingTowards.normalized / movingTowards.magnitude;
@@ -238,16 +240,16 @@ public class Agent : MonoBehaviour
         return separationVector.normalized;
     }
 
-    bool isOnLeaderSight(Agent leader, Vector3 leaderAhead)
+    bool isOnLeaderSight(Boid leader, Vector3 leaderAhead)
     {
         return Vector3.Distance(leaderAhead, transform.position) <= config.LeaderSightRadius || Vector3.Distance(leader.position, transform.position) <= config.LeaderSightRadius;
     }
 
-    Vector3 Evade(Agent agent)
+    Vector3 Evade(Boid boid)
     {
-        Vector3 distance = agent.position - position;
+        Vector3 distance = boid.position - position;
         float UpdatesAhead = distance.magnitude / config.maxVelocity;
-        Vector3 futurePosition = agent.position + agent.velocity * UpdatesAhead;
+        Vector3 futurePosition = boid.position + boid.velocity * UpdatesAhead;
         return RunAway(futurePosition);
     }
 

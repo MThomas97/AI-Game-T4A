@@ -1352,12 +1352,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34c5b348642ba6445bbd561380931a66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentPrefab: {fileID: 6470346904992417781, guid: 4b1bc4fd3784db041b640fdce4aa1dec,
-    type: 3}
-  numberOfAgents: 0
-  agents: []
-  bounds: 100
-  spawnRadius: 50
+  boids: []
 --- !u!4 &1521745087
 Transform:
   m_ObjectHideFlags: 0
@@ -1395,7 +1390,7 @@ MonoBehaviour:
   cohesionPriority: 1
   CollisionAvoidancePriority: 4000
   maxRayDistance: 1
-  LEADER_BEHIND_DIST: 0.5
+  LEADER_BEHIND_DIST: -0.5
   LEADER_AHEAD_DIST: 1
   LeaderSightRadius: 1.5
   slowingRadius: 3

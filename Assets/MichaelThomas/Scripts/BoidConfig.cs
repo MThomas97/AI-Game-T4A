@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AgentConfig : MonoBehaviour
+public class BoidConfig : MonoBehaviour
 {
     public float maxFOV;
     public float maxAcceleration;

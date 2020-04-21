@@ -4,42 +4,28 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-    public Transform agentPrefab;
-    public int numberOfAgents;
-    public List<Agent> agents;
-    public float bounds;
-    public float spawnRadius;
+    public List<Boid> boids;
 
     // Start is called before the first frame update
     void Start()
     {
-        agents = new List<Agent>();
+        boids = new List<Boid>();
 
-        Spawn(agentPrefab, numberOfAgents);
-
-        agents.AddRange(FindObjectsOfType<Agent>());
+        boids.AddRange(FindObjectsOfType<Boid>());
     }
 
-    void Spawn(Transform prefab, int Count)
+    public List<Boid> GetNeighbours(Boid boid, float radius)
     {
-        for(int i = 0; i < Count; i++)
-        {
-            Instantiate(prefab, new Vector3(Random.Range(-spawnRadius, spawnRadius), Random.Range(-spawnRadius, spawnRadius), 0), Quaternion.identity);
-        }
-    }
-
-    public List<Agent> GetNeighbours(Agent agent, float radius)
-    {
-        List<Agent> neighboursFound = new List<Agent>();
+        List<Boid> neighboursFound = new List<Boid>();
         
-        foreach(Agent otherAgent in agents)
+        foreach(Boid otherBoid in boids)
         {
-            if (otherAgent == agent)
+            if (otherBoid == boid)
                 continue;
 
-            if(Vector3.Distance(agent.position, otherAgent.position) <= radius)
+            if(Vector3.Distance(boid.position, otherBoid.position) <= radius)
             {
-                neighboursFound.Add(otherAgent);
+                neighboursFound.Add(otherBoid);
             }
         }
 
