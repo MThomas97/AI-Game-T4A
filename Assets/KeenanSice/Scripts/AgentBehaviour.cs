@@ -63,7 +63,7 @@ public class AgentBehaviour : MonoBehaviour
 
     void OnGUI()
     {
-        float heightOffset = (Screen.height / (float)World.agents.Count) * agentController.teamNumber;
+        float heightOffset = (Screen.height / (float)World.agentTeams.Count) * agentController.teamNumber;
         GUI.contentColor = World.playerColours[agentController.teamNumber];
         GUI.Label(new Rect(10, heightOffset, Screen.width * 0.5f, heightOffset), debugOutput);
     }
@@ -240,25 +240,32 @@ public class AgentBehaviour : MonoBehaviour
         float closestDistance = -1.0f;
         GameObject target = null;
 
-        foreach (Controller enemy in World.agents)
+        for (int enemyTeamNumber = 0; enemyTeamNumber < World.agentTeams.Count; enemyTeamNumber++)
         {
-            if (enemy == null || enemy.teamNumber == agentController.teamNumber) continue;
+            //Skip if on the same team.
+            if (enemyTeamNumber == agentController.teamNumber) continue;
 
-            Vector3 enemyDir = Vector3.Normalize(enemy.transform.position - transform.position);
-            float angle = Vector3.Angle(transform.right, enemyDir);
-            if(angle > agentController.fieldOfView * 0.5f) continue;
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-
-            if (distance < closestDistance || closestDistance < 0)
+            foreach (Controller enemy in World.agentTeams[enemyTeamNumber])
             {
-                //If we hit a collider trying to cast to the enemy, we technically can't see them, so ignore them. Most expensive check so left till last.
-                RaycastHit2D hit = Physics2D.Linecast(transform.position, enemy.transform.position, World.enemyAttackLayerMask);
-                if (hit.collider != null) continue;
+                if (enemy)
+                {
+                    Vector3 enemyDir = Vector3.Normalize(enemy.transform.position - transform.position);
+                    float angle = Vector3.Angle(transform.right, enemyDir);
+                    if (angle > agentController.fieldOfView * 0.5f) continue;
+                    float distance = Vector3.Distance(transform.position, enemy.transform.position);
 
-                closestDistance = distance;
-                target = enemy.gameObject;
+                    if (distance < closestDistance || closestDistance < 0)
+                    {
+                        //If we hit a collider trying to cast to the enemy, we technically can't see them, so ignore them. Most expensive check so left till last.
+                        RaycastHit2D hit = Physics2D.Linecast(transform.position, enemy.transform.position, World.enemyAttackLayerMask);
+                        if (hit.collider != null) continue;
 
-                Debug.DrawRay(transform.position, enemyDir, Color.red);
+                        closestDistance = distance;
+                        target = enemy.gameObject;
+
+                        Debug.DrawRay(transform.position, enemyDir, Color.red);
+                    }
+                }
             }
         }
 

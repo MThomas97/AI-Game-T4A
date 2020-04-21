@@ -87,7 +87,10 @@ public class World : MonoBehaviour
     public static List<SpawnpointTile> spawnpointTiles = new List<SpawnpointTile>();
     public static List<HealthTile> healthTiles = new List<HealthTile>();
     public static List<AmmoTile> ammoTiles = new List<AmmoTile>();
-    public static List<Controller> agents = new List<Controller>();
+    //public static List<Controller> agents = new List<Controller>();
+
+    public static List<List<Controller>> agentTeams = new List<List<Controller>>();
+
     public int WorldSize;
 
     public int totalHumanPlayers = 1;
@@ -125,11 +128,11 @@ public class World : MonoBehaviour
 
                     agent.GetComponent<SpriteRenderer>().color = playerColours[i];
 
-                    bool isHuman = (x == 0 && i < totalHumanPlayers);
-
                     Controller controller = null;
 
-                    if (isHuman)
+                    bool isLeaderOfTeam = x == 0;
+
+                    if (isLeaderOfTeam && i < totalHumanPlayers)
                     {
                         controller = agent.AddComponent<PlayerController>();
                     }
@@ -138,13 +141,19 @@ public class World : MonoBehaviour
                         controller = agent.AddComponent<AgentController>();
                     }
 
+                    if (isLeaderOfTeam)
+                    {
+                        agentTeams.Add(new List<Controller>());
+                    }
+
                     controller.teamNumber = i;
-                    agents.Add(controller);
+
+                    agentTeams[i].Add(controller);
+                    SetupTeamLeader(i);
                 }
             }
         }
     }
-
 
     void SetupCamera()
     {
@@ -152,6 +161,24 @@ public class World : MonoBehaviour
         Camera.main.orthographicSize = (worldTileDimensions.x > worldTileDimensions.y ? worldTileDimensions.x * 0.5f : worldTileDimensions.y * 0.5f) * 1.25f;
     }
 
+    public static void RemoveControllerFromTeam(Controller controller)
+    {
+        agentTeams[controller.teamNumber].Remove(controller);
+        SetupTeamLeader(controller.teamNumber);
+    }
+
+    private static void SetupTeamLeader(int teamNumber)
+    {
+        if (agentTeams[teamNumber].Count > 0)
+        {
+            Controller leader = agentTeams[teamNumber][0];
+
+            if (!(leader is PlayerController) && !agentTeams[teamNumber][0].GetComponent<AgentBehaviour>())
+            {
+                agentTeams[teamNumber][0].gameObject.AddComponent<AgentBehaviour>();
+            }
+        }
+    }
 
     void GenerateWorld()
     {
@@ -170,6 +197,7 @@ public class World : MonoBehaviour
             return;
         }
     }
+
 
     void GenerateWorldFromPerlin()
     {
@@ -207,6 +235,19 @@ public class World : MonoBehaviour
 
                 SetupTile(newTile, x, y);
             }
+        }
+    }
+
+    public static int AgentCount
+    {
+        get
+        {
+            int count = 0;
+            foreach (List<Controller> team in agentTeams)
+            {
+                count += team.Count;
+            }
+            return count;
         }
     }
 

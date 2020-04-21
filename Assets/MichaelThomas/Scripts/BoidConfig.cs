@@ -2,33 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoidConfig : MonoBehaviour
+public static class BoidConfig
 {
-    public float maxFOV;
-    public float maxAcceleration;
-    public float maxVelocity;
+    static public float maxFOV = 120;
+    static public float rotationSpeed = 90;
 
     //Seperation Variables
-    public float separationRadius;
-    public float separationPriority;
+    static public float separationRadius = 1.5f;
+    static public float separationPriority = 90;
 
     //Alignment Variables
-    public float alignmentRadius;
-    public float alignmentPriority;
+    static public float alignmentRadius = 10;
+    static public float alignmentPriority = 90;
 
     //Cohesion Variables
-    public float cohesionRadius;
-    public float cohesionPriority;
+    static public float cohesionRadius = 10;
+    static public float cohesionPriority = 1;
 
     //Collision Avoidance Variables
-    public float CollisionAvoidancePriority;
+    static public float CollisionAvoidancePriority = 4000;
 
     //Raycasting
-    public float maxRayDistance;
+    static public float maxRayDistance = 0.5f;
 
     //Leader Following
-    public float LEADER_BEHIND_DIST;
-    public float LEADER_AHEAD_DIST;
-    public float LeaderSightRadius;
-    public float slowingRadius;
+    static public float LEADER_BEHIND_DIST = -0.5f;
+    static public float LEADER_AHEAD_DIST = 1;
+    static public float LeaderSightRadius = 1.5f;
+    static public float slowingRadius = 3;
 }

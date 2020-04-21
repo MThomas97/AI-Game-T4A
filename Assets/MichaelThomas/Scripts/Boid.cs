@@ -4,76 +4,70 @@ using UnityEngine;
 
 public class Boid : MonoBehaviour
 {
-    public Vector3 position;
     public Vector3 velocity;
     public Vector3 acceleration;
     public Vector3 ahead;
     public Vector3 behind;
 
-    public Quaternion rotation;
-    public GameObject leaderGameObject;
+    private Vector3 lastPosition = Vector3.zero;
 
-    public Level level;
-    public BoidConfig config;
+    public Boid Leader
+    {
+        get
+        {
+            return World.agentTeams[agentController.teamNumber][0].boid;
+        }
+    }
 
-    public bool isLeader = false;
+    public bool IsLeader
+    {
+        get
+        {
+            return Leader == this;
+        }
+    }
 
-    private Boid leader;
+    private Controller agentController;
 
     private void Start()
     {
-
-        level = FindObjectOfType<Level>();
-        config = FindObjectOfType<BoidConfig>();
-
-        if (leaderGameObject == null && this.name != "Leader")
-        {//Temp for setting the leader
-            leaderGameObject = GameObject.Find("Leader");
-            leader = leaderGameObject.GetComponent<Boid>();
-            leader.isLeader = true;
-        }
-        
-        position = transform.position;
-        rotation = transform.rotation;
+        agentController = GetComponent<AgentController>();
         velocity = new Vector3();
     }
 
     void FixedUpdate()
     {
-        if (isLeader)
-        { //Temporary for moving the leader change later so we can get the velocity of the leader from world script?
-            acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
-            velocity = new Vector3(0, 3, 0);
+        if (!IsLeader)
+        {
+            acceleration = followLeader();
+            RaycastCollision();
+            acceleration = Vector3.ClampMagnitude(acceleration, agentController.movementSpeed);
             velocity = velocity + acceleration * Time.deltaTime;
-            velocity = Vector3.ClampMagnitude(velocity, config.maxVelocity);
-            position = position + velocity * Time.deltaTime;
-            transform.position = position;
-            transform.rotation = rotation;
+            velocity = Vector3.ClampMagnitude(velocity, agentController.movementSpeed);
+            transform.position += velocity * Time.deltaTime;
+
+            float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
+            Quaternion quart = Quaternion.AngleAxis(angle, Vector3.forward);
+
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, quart, Time.deltaTime * BoidConfig.rotationSpeed);
         }
         else
         {
-            acceleration = followLeader();
-            RaycastCollison();
-            acceleration = Vector3.ClampMagnitude(acceleration, config.maxAcceleration);
-            velocity = velocity + acceleration * Time.deltaTime;
-            velocity = Vector3.ClampMagnitude(velocity, config.maxVelocity);
-            position = position + velocity * Time.deltaTime;
-            transform.position = position;
-            transform.rotation = rotation;
-
+            velocity = transform.position - lastPosition;
         }
 
+        lastPosition = transform.position;
     }
 
-    void RaycastCollison()
+    void RaycastCollision()
     {
         Vector3 leftSensorDir = Quaternion.Euler(90, 180, 0) * new Vector3(1, 1, 0) + velocity;
         Vector3 RightSensorDir = Quaternion.Euler(180, 20, 0) * new Vector3(1, 1, 0) + velocity;
         leftSensorDir.z = 0;
         RightSensorDir.z = 0;
-        RaycastHit2D centreHit = Physics2D.Raycast(transform.position, velocity, velocity.magnitude * config.maxRayDistance);
-        RaycastHit2D LeftHit = Physics2D.Raycast(transform.position, leftSensorDir, velocity.magnitude * config.maxRayDistance);
-        RaycastHit2D RightHit = Physics2D.Raycast(transform.position, RightSensorDir, velocity.magnitude * config.maxRayDistance);
+        RaycastHit2D centreHit = Physics2D.Raycast(transform.position, velocity, velocity.magnitude * BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
+        RaycastHit2D LeftHit = Physics2D.Raycast(transform.position, leftSensorDir, velocity.magnitude * BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
+        RaycastHit2D RightHit = Physics2D.Raycast(transform.position, RightSensorDir, velocity.magnitude * BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
         Vector3 newDir = new Vector3();
         int iterationCount = 6;
         float angleMin = 180 / iterationCount;
@@ -89,14 +83,14 @@ public class Boid : MonoBehaviour
                     else
                         newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * velocity);
        
-                    if(!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * config.maxRayDistance))
+                    if(!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * BoidConfig.maxRayDistance, World.enemyAttackLayerMask))
                     {
-                        Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.green);
+                        Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.green);
                         newDir.z = 0;
-                        velocity = newDir.normalized * (config.CollisionAvoidancePriority / centreHit.distance);
+                        velocity = newDir.normalized * (BoidConfig.CollisionAvoidancePriority / centreHit.distance);
                         return;
                     }
-                    Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.red);
+                    Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.red);
                 }
             }
         }
@@ -111,14 +105,14 @@ public class Boid : MonoBehaviour
                     else
                         newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * leftSensorDir);
 
-                    if (!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * config.maxRayDistance))
+                    if (!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * BoidConfig.maxRayDistance, World.enemyAttackLayerMask))
                     {
-                        Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.green);
+                        Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.green);
                         newDir.z = 0;
-                        velocity = newDir.normalized * (config.CollisionAvoidancePriority / LeftHit.distance);
+                        velocity = newDir.normalized * (BoidConfig.CollisionAvoidancePriority / LeftHit.distance);
                         return;
                     }
-                    Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.red);
+                    Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.red);
                 }
             }
         }
@@ -133,61 +127,66 @@ public class Boid : MonoBehaviour
                     else
                         newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * leftSensorDir);
 
-                    if (!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * config.maxRayDistance))
+                    if (!Physics2D.Raycast(transform.position, newDir, newDir.magnitude * BoidConfig.maxRayDistance, World.enemyAttackLayerMask))
                     {
-                        Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.green);
+                        Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.green);
                         newDir.z = 0;
-                        velocity = newDir.normalized * (config.CollisionAvoidancePriority / RightHit.distance);
+                        velocity = newDir.normalized * (BoidConfig.CollisionAvoidancePriority / RightHit.distance);
                         return;
                     }
-                    Debug.DrawRay(transform.position, newDir * config.maxRayDistance, Color.red);
+                    Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.red);
                 }
             }
         }
-        Debug.DrawRay(transform.position, leftSensorDir * config.maxRayDistance, Color.white);
-        Debug.DrawRay(transform.position, RightSensorDir * config.maxRayDistance, Color.white);
-        Debug.DrawRay(transform.position, velocity * config.maxRayDistance, Color.white);
+        Debug.DrawRay(transform.position, leftSensorDir * BoidConfig.maxRayDistance, Color.white);
+        Debug.DrawRay(transform.position, RightSensorDir * BoidConfig.maxRayDistance, Color.white);
+        Debug.DrawRay(transform.position, velocity * BoidConfig.maxRayDistance, Color.white);
     }
 
     Vector3 followLeader()
     {
-        Vector3 tv = leader.velocity;
-        Vector3 force = new Vector3();
+        if (Leader)
+        {
+            Vector3 tv = Leader.velocity;
+            Vector3 force = new Vector3();
 
-        //Calculate the ahead point
-        Vector3.Normalize(tv);
-        tv.Scale(new Vector3(config.LEADER_AHEAD_DIST, config.LEADER_AHEAD_DIST, 0));
-        ahead = leader.position + tv;
-        ahead = leader.position + tv;
+            //Calculate the ahead point
+            Vector3.Normalize(tv);
+            tv.Scale(new Vector3(BoidConfig.LEADER_AHEAD_DIST, BoidConfig.LEADER_AHEAD_DIST, 0));
+            ahead = Leader.transform.position + tv;
+            ahead = Leader.transform.position + tv;
 
-        //Calculate the behind point
-        tv.Scale(new Vector3(config.LEADER_BEHIND_DIST, config.LEADER_BEHIND_DIST, 0));
-        behind = leader.position + tv;
+            //Calculate the behind point
+            tv.Scale(new Vector3(BoidConfig.LEADER_BEHIND_DIST, BoidConfig.LEADER_BEHIND_DIST, 0));
+            behind = Leader.transform.position + tv;
 
-        if (isOnLeaderSight(leader, ahead))
-            force = force + Evade(leader);
+            if (isOnLeaderSight(Leader, ahead))
+                force = force + Evade(Leader);
 
-        force = force + Arrival(behind);
+            force = force + Arrival(behind);
 
-        force = force + Separation() * config.separationPriority;
+            force = force + Separation() * BoidConfig.separationPriority;
 
-        return force;
+            return force;
+        }
+
+        return Vector3.zero;
     }
 
     Vector3 Cohesion()
     {
         Vector3 cohesionVector = new Vector3();
         int countBoids = 0;
-        List<Boid> neighbours = level.GetNeighbours(this, config.cohesionRadius);
+        List<Boid> neighbours = GetNeighbours(BoidConfig.cohesionRadius);
 
         if (neighbours.Count == 0)
             return cohesionVector;
 
         foreach (Boid boid in neighbours)
         {
-            if (isInFOV(boid.position))
+            if (isInFOV(boid.transform.position))
             {
-                cohesionVector += boid.position;
+                cohesionVector += boid.transform.position;
                 countBoids++;
             }
         }
@@ -196,7 +195,7 @@ public class Boid : MonoBehaviour
             return cohesionVector;
 
         cohesionVector /= countBoids;
-        cohesionVector = cohesionVector - this.position;
+        cohesionVector = cohesionVector - transform.position;
         cohesionVector = Vector3.Normalize(cohesionVector);
         return cohesionVector;
     }
@@ -204,14 +203,14 @@ public class Boid : MonoBehaviour
     Vector3 Alignment()
     {
         Vector3 alignVector = new Vector3();
-        List<Boid> boids = level.GetNeighbours(this, config.alignmentRadius);
+        List<Boid> boids = GetNeighbours(BoidConfig.alignmentRadius);
 
         if (boids.Count == 0)
             return alignVector;
 
         foreach (Boid boid in boids)
         {
-            if (isInFOV(boid.position))
+            if (isInFOV(boid.transform.position))
                 alignVector += boid.velocity;
         }
 
@@ -221,16 +220,16 @@ public class Boid : MonoBehaviour
     Vector3 Separation()
     {
         Vector3 separationVector = new Vector3();
-        List<Boid> boids = level.GetNeighbours(this, config.separationRadius);
+        List<Boid> boids = GetNeighbours(BoidConfig.separationRadius);
 
         if (boids.Count == 0)
             return separationVector;
 
         foreach (Boid boid in boids)
         {
-            if (isInFOV(boid.position) && !boid.isLeader)
+            if (isInFOV(boid.transform.position) && !boid.IsLeader)
             {
-                Vector3 movingTowards = this.position - boid.position;
+                Vector3 movingTowards = transform.position - boid.transform.position;
                 if (movingTowards.magnitude > 0)
                 {
                     separationVector += movingTowards.normalized / movingTowards.magnitude;
@@ -242,29 +241,29 @@ public class Boid : MonoBehaviour
 
     bool isOnLeaderSight(Boid leader, Vector3 leaderAhead)
     {
-        return Vector3.Distance(leaderAhead, transform.position) <= config.LeaderSightRadius || Vector3.Distance(leader.position, transform.position) <= config.LeaderSightRadius;
+        return Vector3.Distance(leaderAhead, transform.position) <= BoidConfig.LeaderSightRadius || Vector3.Distance(leader.transform.position, transform.position) <= BoidConfig.LeaderSightRadius;
     }
 
     Vector3 Evade(Boid boid)
     {
-        Vector3 distance = boid.position - position;
-        float UpdatesAhead = distance.magnitude / config.maxVelocity;
-        Vector3 futurePosition = boid.position + boid.velocity * UpdatesAhead;
+        Vector3 distance = boid.transform.position - transform.position;
+        float UpdatesAhead = distance.magnitude / agentController.movementSpeed;
+        Vector3 futurePosition = boid.transform.position + boid.velocity * UpdatesAhead;
         return RunAway(futurePosition);
     }
 
     Vector3 Arrival(Vector3 target)
     {
-        Vector3 desiredVelocity = target - position;
+        Vector3 desiredVelocity = target - transform.position;
         float distance = desiredVelocity.magnitude;
 
-        if (distance < config.slowingRadius)
+        if (distance < BoidConfig.slowingRadius)
         {
-            desiredVelocity = desiredVelocity.normalized * config.maxVelocity * (distance / config.slowingRadius);
+            desiredVelocity = desiredVelocity.normalized * agentController.movementSpeed * (distance / BoidConfig.slowingRadius);
         }
         else
         {
-            desiredVelocity = desiredVelocity.normalized * config.maxVelocity;
+            desiredVelocity = desiredVelocity.normalized * agentController.movementSpeed;
         }
 
         return desiredVelocity - velocity;
@@ -272,12 +271,32 @@ public class Boid : MonoBehaviour
 
     Vector3 RunAway(Vector3 target)
     {
-        Vector3 neededVelocity = (position - target).normalized * config.maxVelocity;
+        Vector3 neededVelocity = (transform.position - target).normalized * agentController.movementSpeed;
         return neededVelocity - velocity;
     }
 
     bool isInFOV(Vector3 vec)
     {
-        return Vector3.Angle(this.velocity, vec - this.position) <= config.maxFOV;
+        return Vector3.Angle(velocity, vec - transform.position) <= BoidConfig.maxFOV;
+    }
+
+    public List<Boid> GetNeighbours(float radius)
+    {
+        List<Controller> team = World.agentTeams[agentController.teamNumber];
+
+        List<Boid> neighboursFound = new List<Boid>();
+
+        foreach (Controller teamController in team)
+        {
+            if (teamController == agentController)
+                continue;
+
+            if (Vector3.Distance(transform.position, teamController.transform.position) <= radius)
+            {
+                neighboursFound.Add(teamController.boid);
+            }
+        }
+
+        return neighboursFound;
     }
 }

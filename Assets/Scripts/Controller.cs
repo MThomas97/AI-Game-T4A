@@ -33,10 +33,14 @@ public class Controller : MonoBehaviour
     Transform healthbar = null;
     Transform ammobar = null;
 
+    public Boid boid { get; protected set; } = null;
+
     protected void Start()
     {
         healthbar = transform.GetChild(0);
         ammobar = transform.GetChild(1);
+
+        boid = GetComponent<Boid>();
 
         lr = GetComponent<LineRenderer>();
         lr.widthMultiplier = 0.25f;
@@ -44,7 +48,6 @@ public class Controller : MonoBehaviour
         lr.material.color = World.playerColours[teamNumber];
         SetHealth(healthMax);
         ammo = ammoMax;
-
     }
 
     public bool HasAmmo()
@@ -63,7 +66,11 @@ public class Controller : MonoBehaviour
 
         healthbar.localScale = new Vector3(healthbar.localScale.x, health / (float)healthMax, healthbar.localScale.z);
 
-        if (health <= 0) Destroy(transform.gameObject);
+        if (health <= 0)
+        {
+            World.RemoveControllerFromTeam(this);
+            Destroy(transform.gameObject);
+        }
     }
 
     public bool IsFullHealth()

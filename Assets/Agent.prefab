@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 4616702162236567789}
   - component: {fileID: -3041594630360959557}
   - component: {fileID: 4899211176895401721}
+  - component: {fileID: 4561614326353476776}
   m_Layer: 10
   m_Name: Agent
   m_TagString: AIPlayer
@@ -191,6 +192,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4616702162236567698}
   m_CullTransparentMesh: 0
+--- !u!114 &4561614326353476776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4616702162236567698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2f25342f35066b44a318b3eb8db55c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  position: {x: 0, y: 0, z: 0}
+  velocity: {x: 0, y: 0, z: 0}
+  acceleration: {x: 0, y: 0, z: 0}
+  ahead: {x: 0, y: 0, z: 0}
+  behind: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 0}
+  leaderGameObject: {fileID: 0}
+  level: {fileID: 0}
+  config: {fileID: 0}
+  isLeader: 0
 --- !u!1 &8702608785310915921
 GameObject:
   m_ObjectHideFlags: 0

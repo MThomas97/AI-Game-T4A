@@ -66,19 +66,23 @@ public class PlayerController : Controller
     {
         Controller attackee = null;
 
-        foreach (Controller enemy in World.agents)
+        for (int enemyTeamNumber = 0; enemyTeamNumber < World.agentTeams.Count; enemyTeamNumber++)
         {
-            if (enemy == null || enemy.teamNumber == teamNumber) continue;
+            //Skip if on the same team.
+            if (enemyTeamNumber == teamNumber) continue;
 
-            if (Vector3.Distance(enemy.transform.position, transform.position) > attackRange) continue;
-   
-            Vector3 enemyDir = Vector3.Normalize(enemy.transform.position - transform.position);
-            float angle = Vector3.Angle(transform.right, enemyDir);
-            if (angle > attackAngle * 0.5f) continue;
+            foreach (Controller enemy in World.agentTeams[enemyTeamNumber])
+            {
+                if (enemy && Vector3.Distance(enemy.transform.position, transform.position) < attackRange)
+                {
+                    Vector3 enemyDir = Vector3.Normalize(enemy.transform.position - transform.position);
+                    float angle = Vector3.Angle(transform.right, enemyDir);
+                    if (angle > attackAngle * 0.5f) continue;
 
-            attackee = enemy;
-
-            break;
+                    attackee = enemy;
+                    break;
+                }
+            }
         }
 
         return Attack(attackee);

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(AgentBehaviour))]
-
 public class AgentController : Controller
 {
     public float fieldOfView { get; } = 180.0f;
