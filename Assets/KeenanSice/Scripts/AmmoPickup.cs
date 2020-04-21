@@ -10,7 +10,7 @@ public class AmmoPickup : BasePickup
     {
         if (base.Pickup(instigator))
         {
-            instigator.GiveAmmo(ammoAmount);
+            instigator.SetAmmo(ammoAmount);
             return true;
         }
 

@@ -39,15 +39,15 @@ public class PlayerController : Controller
             Move(new Vector2(horizontalAxis, verticalAxis));
         }
 
-        if(Input.GetButton("Fire_" + teamNumber))
+        if(Input.GetButtonDown("Fire_" + teamNumber))
         {
-            if (HasAmmo())
+            if (!TryPickup())
             {
-                TryAttack();
+                if (HasAmmo())
+                {
+                    TryAttack();
+                }
             }
-
-            TryPickup();
-          
         }
     }
 
@@ -64,6 +64,8 @@ public class PlayerController : Controller
 
     bool TryAttack()
     {
+        Controller attackee = null;
+
         foreach (Controller enemy in World.agents)
         {
             if (enemy == null || enemy.teamNumber == teamNumber) continue;
@@ -74,38 +76,50 @@ public class PlayerController : Controller
             float angle = Vector3.Angle(transform.right, enemyDir);
             if (angle > attackAngle * 0.5f) continue;
 
-            Attack(enemy);
-            return true;
+            attackee = enemy;
+
+            break;
         }
-        return false;
+
+        return Attack(attackee);
     }
 
-    void TryPickup()
+
+    bool TryPickup()
     {
-        TryPickupAmmo();
-        TryPickupHealth();
+        return (TryPickupAmmo() || TryPickupHealth());
     }
 
-    void TryPickupAmmo()
+    bool TryPickupAmmo()
     {
         if (!HasFullAmmo())
         {
-            foreach (AmmoTile ammo in World.ammoTiles)
+            foreach (AmmoTile ammoTile in World.ammoTiles)
             {
-                if(TryPickupBase(ammo)) return;
+                if (TryPickupBase(ammoTile))
+                {
+                    return true;
+                }
             }
         }
+
+        return false;
     }
 
-    void TryPickupHealth()
+    bool TryPickupHealth()
     {
         if (!IsFullHealth())
         {
             foreach (HealthTile healthTile in World.healthTiles)
             {
-                if (TryPickupBase(healthTile)) return;
+                if (TryPickupBase(healthTile))
+                {
+                    return true;
+                }
             }
         }
+
+        return false;
     }
 
     bool TryPickupBase(PickupTile pickupTile)

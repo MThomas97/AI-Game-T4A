@@ -28,15 +28,23 @@ public class Controller : MonoBehaviour
     LineRenderer lr = null;
     const float laserLineLifeLength = 1.0f;
     float laserLineResetTimer = 0.0f;
+    const float laserLineMaxMissLength = 20.0f;
+
+    Transform healthbar = null;
+    Transform ammobar = null;
 
     protected void Start()
     {
+        healthbar = transform.GetChild(0);
+        ammobar = transform.GetChild(1);
+
         lr = GetComponent<LineRenderer>();
         lr.widthMultiplier = 0.25f;
         lr.material = new Material(Shader.Find("Unlit/Color"));
         lr.material.color = World.playerColours[teamNumber];
         SetHealth(healthMax);
         ammo = ammoMax;
+
     }
 
     public bool HasAmmo()
@@ -52,6 +60,9 @@ public class Controller : MonoBehaviour
     public void SetHealth(int newHealth)
     {
         health = newHealth;
+
+        healthbar.localScale = new Vector3(healthbar.localScale.x, health / (float)healthMax, healthbar.localScale.z);
+
         if (health <= 0) Destroy(transform.gameObject);
     }
 
@@ -78,26 +89,44 @@ public class Controller : MonoBehaviour
         }
     }
 
-    public void Attack(Controller attackee)
+    public bool Attack(Controller attackee)
     {
         if (!(attackSpeedTimer > 0.0f) && HasAmmo())
         {
-            ammo -= 1;
+            SetAmmo(ammo - 1);
             attackSpeedTimer = attackSpeed;
 
-            RaycastHit2D hit = Physics2D.Linecast(transform.position, attackee.transform.position, World.enemyAttackLayerMask);
-
-            Vector3 hitPoint = hit ? new Vector3(hit.point.x, hit.point.y, 0) : attackee.transform.position;
-
-            lr.positionCount = 2;
-            lr.SetPositions(new Vector3[2] { transform.position, hitPoint });
-            laserLineResetTimer = laserLineLifeLength;
-
-            if (!hit)
+            if (attackee)
             {
-                attackee.Damage(this, attackDamage);
+                RaycastHit2D hit = Physics2D.Linecast(transform.position, attackee.transform.position, World.enemyAttackLayerMask);
+
+                if (hit)
+                {
+                    DisplayLaserLine(new Vector3(hit.point.x, hit.point.y, 0));
+                }
+                else
+                {
+                    DisplayLaserLine(attackee.transform.position);
+                    attackee.Damage(this, attackDamage);
+                    return true;
+                }
+            }
+            else
+            {
+                Vector3 endPosition = transform.position + transform.right * laserLineMaxMissLength;
+                RaycastHit2D hit = Physics2D.Linecast(transform.position, endPosition, World.enemyAttackLayerMask);
+                DisplayLaserLine(hit ? new Vector3(hit.point.x, hit.point.y, 0.0f) : endPosition);
             }
         }
+
+        return false;
+    }
+
+    public void DisplayLaserLine(Vector3 endFireLine)
+    {
+        lr.positionCount = 2;
+        lr.SetPositions(new Vector3[2] { transform.position, endFireLine });
+        laserLineResetTimer = laserLineLifeLength;
     }
 
     public void Damage(Controller attacker, int amount)
@@ -110,8 +139,9 @@ public class Controller : MonoBehaviour
         pickup.Pickup(this);
     }
 
-    public void GiveAmmo(int amount)
+    public void SetAmmo(int newAmmo)
     {
-        ammo = Mathf.Min(ammo + amount, ammoMax);
+        ammo = Mathf.Min(newAmmo, ammoMax);
+        ammobar.localScale = new Vector3(ammobar.localScale.x, ammo / (float)ammoMax, ammobar.localScale.z);
     }
 }

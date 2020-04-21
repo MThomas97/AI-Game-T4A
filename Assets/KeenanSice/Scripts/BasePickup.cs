@@ -38,8 +38,15 @@ public class BasePickup : MonoBehaviour
         if (!IsPickupActive())
         {
             pickupTimer -= Time.deltaTime;
-            pickupTimer = pickupTimer < 0.0f ? 0.0f : pickupTimer;
-            spriteRenderer.color = startColour * (1.0f - pickupTimer / pickupTimerAmount);
+            if (pickupTimer < 0.0f)
+            {
+                spriteRenderer.color = startColour;
+                pickupTimer = 0.0f;
+            }
+            else
+            {
+                spriteRenderer.color = Color.white * (1.0f - pickupTimer / pickupTimerAmount);
+            }
         }
     }
 }
