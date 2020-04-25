@@ -89,7 +89,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5176654590563815698}
   - component: {fileID: 4616702162236567789}
-  - component: {fileID: -3041594630360959557}
   - component: {fileID: 4899211176895401721}
   - component: {fileID: 4561614326353476776}
   m_Layer: 10
@@ -168,22 +167,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!58 &-3041594630360959557
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4616702162236567698}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5
 --- !u!222 &4899211176895401721
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -204,16 +187,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2f25342f35066b44a318b3eb8db55c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 0, y: 0, z: 0}
   velocity: {x: 0, y: 0, z: 0}
   acceleration: {x: 0, y: 0, z: 0}
   ahead: {x: 0, y: 0, z: 0}
   behind: {x: 0, y: 0, z: 0}
-  rotation: {x: 0, y: 0, z: 0, w: 0}
-  leaderGameObject: {fileID: 0}
-  level: {fileID: 0}
-  config: {fileID: 0}
-  isLeader: 0
 --- !u!1 &8702608785310915921
 GameObject:
   m_ObjectHideFlags: 0

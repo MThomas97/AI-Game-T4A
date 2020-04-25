@@ -12,15 +12,12 @@ public class AgentBehaviour : MonoBehaviour
         bt = behaviourTree(
             sequence(
                 action(CheckResetTargetTimer),
-                condition(agentController.HasAmmo,
-                    //HasAmmo - true
-                    selector(
-                        action(SetTargetToEnemyInSight),
-                        action(SetTargetToLastEnemySeen),
-                        action(StartPatrol)
-                    ),
-                    //HasAmmo - false
-                    action(SetTargetToClosestActiveAmmo)
+                selector(
+                    action(SetTargetToClosestActiveAmmo),
+                    action(SetTargetToEnemyInSight),
+                    action(SetTargetToLastEnemySeen),
+                    action(SetTargetToClosestActiveHealth),
+                    action(StartPatrol)
                 ),
                 condition(HasTarget,
                     //HasTarget - true
@@ -63,9 +60,10 @@ public class AgentBehaviour : MonoBehaviour
 
     void OnGUI()
     {
-        float heightOffset = (Screen.height / (float)World.agentTeams.Count) * agentController.teamNumber;
+        float labelHeight = (Screen.height / (float)World.agentTeams.Count);
+        float heightOffset = labelHeight * agentController.teamNumber;
         GUI.contentColor = World.playerColours[agentController.teamNumber];
-        GUI.Label(new Rect(10, heightOffset, Screen.width * 0.5f, heightOffset), debugOutput);
+        GUI.Label(new Rect(10, heightOffset , Screen.width * 0.5f, labelHeight), debugOutput);
     }
 
 
@@ -141,7 +139,12 @@ public class AgentBehaviour : MonoBehaviour
 
     bool SetTargetToClosestActiveAmmo()
     {
-        //Already have ammo target;
+        if (agentController.HasAmmo())
+        {
+            return false;
+        }
+
+        //Already have ammo target.
         if (targetObject != null)
         {
             AmmoPickup targetAmmo = targetObject.GetComponent<AmmoPickup>();
@@ -167,6 +170,48 @@ public class AgentBehaviour : MonoBehaviour
                 {
                     closestDistance = distance;
                     target = World.ammoTiles[i].mTileObject;
+                }
+            }
+        }
+
+        SetTarget(target);
+
+        return target != null;
+    }
+
+    bool SetTargetToClosestActiveHealth()
+    {
+        if (agentController.IsFullHealth())
+        {
+            return false;
+        }
+
+        //Already have a health target.
+        if (targetObject != null)
+        {
+            HealthPickup targetHealth = targetObject.GetComponent<HealthPickup>();
+            if (targetHealth && targetHealth.IsPickupActive())
+            {
+                return true;
+            }
+        }
+
+        GameObject target = null;
+
+        if (World.healthTiles.Count > 0)
+        {
+            float closestDistance = -1;
+
+            for (int i = 0; i < World.healthTiles.Count; i++)
+            {
+                //If not active skip.
+                if (!World.healthTiles[i].pickupComponent.IsPickupActive()) continue;
+
+                float distance = Vector3.Distance(transform.position, World.healthTiles[i].mTileObject.transform.position);
+                if (distance < closestDistance || closestDistance < 0.0f)
+                {
+                    closestDistance = distance;
+                    target = World.healthTiles[i].mTileObject;
                 }
             }
         }

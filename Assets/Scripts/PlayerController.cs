@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CircleCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
 
 public class PlayerController : Controller
@@ -22,25 +23,21 @@ public class PlayerController : Controller
     protected new void Update()
     {
         base.Update();
+
+        HandleInput();
     }
 
     private void FixedUpdate()
     {
-        HandleInput();
+        HandleFixedUpdateInput();
     }
 
     void HandleInput()
     {
-        float horizontalAxis = Input.GetAxis("Horizontal_" + teamNumber);
-        float verticalAxis = Input.GetAxis("Vertical_" + teamNumber);
-
-        if (Mathf.Abs(horizontalAxis) > axisMovementDeadzone || Mathf.Abs(verticalAxis) > axisMovementDeadzone)
+        if (Input.GetButtonDown("Fire_" + teamNumber))
         {
-            Move(new Vector2(horizontalAxis, verticalAxis));
-        }
+            Debug.Log(Time.fixedTime);
 
-        if(Input.GetButtonDown("Fire_" + teamNumber))
-        {
             if (!TryPickup())
             {
                 if (HasAmmo())
@@ -48,6 +45,17 @@ public class PlayerController : Controller
                     TryAttack();
                 }
             }
+        }
+    }
+
+    void HandleFixedUpdateInput()
+    {
+        float horizontalAxis = Input.GetAxis("Horizontal_" + teamNumber);
+        float verticalAxis = Input.GetAxis("Vertical_" + teamNumber);
+
+        if (Mathf.Abs(horizontalAxis) > axisMovementDeadzone || Mathf.Abs(verticalAxis) > axisMovementDeadzone)
+        {
+            Move(new Vector2(horizontalAxis, verticalAxis));
         }
     }
 
@@ -96,14 +104,11 @@ public class PlayerController : Controller
 
     bool TryPickupAmmo()
     {
-        if (!HasFullAmmo())
+        foreach (AmmoTile ammoTile in World.ammoTiles)
         {
-            foreach (AmmoTile ammoTile in World.ammoTiles)
+            if (TryPickupBase(ammoTile))
             {
-                if (TryPickupBase(ammoTile))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -112,14 +117,11 @@ public class PlayerController : Controller
 
     bool TryPickupHealth()
     {
-        if (!IsFullHealth())
+        foreach (HealthTile healthTile in World.healthTiles)
         {
-            foreach (HealthTile healthTile in World.healthTiles)
+            if (TryPickupBase(healthTile))
             {
-                if (TryPickupBase(healthTile))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 

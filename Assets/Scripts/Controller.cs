@@ -23,7 +23,7 @@ public class Controller : MonoBehaviour
     public float attackRange { get; } = 10.0f;
     public float attackAngle { get; } = 45.0f;
 
-    public float pickupRange { get; } = 1.0f;
+    public float pickupRange { get; } = 2.0f;
 
     LineRenderer lr = null;
     const float laserLineLifeLength = 1.0f;

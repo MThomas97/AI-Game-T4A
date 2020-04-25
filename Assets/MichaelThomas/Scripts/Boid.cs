@@ -31,7 +31,7 @@ public class Boid : MonoBehaviour
 
     private void Start()
     {
-        agentController = GetComponent<AgentController>();
+        agentController = GetComponent<Controller>();
         velocity = new Vector3();
     }
 
