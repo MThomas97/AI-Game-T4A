@@ -73,8 +73,8 @@ public class Boid : MonoBehaviour
             Vector3 newDir = Vector3.zero;
             Vector3 bestDir = Vector3.zero;
             float ClosestDistance = 1000.0f;
-            int iterationCount = 6;
-            float angleMin = 120 / iterationCount;
+            int iterationCount = 10;
+            float angleMin = 180 / iterationCount;
 
             if (centreHit.collider)
             {
@@ -99,6 +99,7 @@ public class Boid : MonoBehaviour
                         {
                             ClosestDistance = Vector2.Distance(transform.position + newDir, LeaderPosOnCollision);
                             bestDir = newDir;
+                            continue;
                         }
                         Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.red);
                     }
@@ -107,13 +108,13 @@ public class Boid : MonoBehaviour
                 if (centreHit.distance == 0)
                 {
                     Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                    velocity = newDir.normalized * (BoidConfig.cohesionPriority / 1);
+                    velocity = newDir.normalized * BoidConfig.CollisionAvoidancePriority;
                     return;
                 }
-                    
                 Debug.DrawRay(transform.position, bestDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                velocity = bestDir.normalized * (BoidConfig.CollisionAvoidancePriority / centreHit.distance);
+                velocity = bestDir.normalized * BoidConfig.CollisionAvoidancePriority;
                 return;
+
             }
             else if (LeftHit.collider)
             {
@@ -138,6 +139,7 @@ public class Boid : MonoBehaviour
                         {
                             ClosestDistance = Vector2.Distance(transform.position + newDir, LeaderPosOnCollision);
                             bestDir = newDir;
+                            continue;
                         }
                         Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.red);
                     }
@@ -146,12 +148,12 @@ public class Boid : MonoBehaviour
                 if (LeftHit.distance == 0)
                 {
                     Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                    velocity = newDir.normalized * (BoidConfig.cohesionPriority / 1);
+                    velocity = newDir.normalized * BoidConfig.CollisionAvoidancePriority;
                     return;
                 }
 
                 Debug.DrawRay(transform.position, bestDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                velocity = bestDir.normalized * (BoidConfig.CollisionAvoidancePriority / LeftHit.distance);
+                velocity = bestDir.normalized * BoidConfig.CollisionAvoidancePriority;
                 return;
             }
             else if (RightHit.collider)
@@ -177,6 +179,7 @@ public class Boid : MonoBehaviour
                         {
                             ClosestDistance = Vector2.Distance(transform.position + newDir, LeaderPosOnCollision);
                             bestDir = newDir;
+                            continue;
                         }
                         Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.red);
                     }
@@ -185,11 +188,10 @@ public class Boid : MonoBehaviour
                 if (RightHit.distance == 0)
                 {
                     Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                    velocity = newDir.normalized * (BoidConfig.cohesionPriority / 1);
+                    velocity = newDir.normalized * BoidConfig.CollisionAvoidancePriority;
                 }
-
                 Debug.DrawRay(transform.position, bestDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                velocity = bestDir.normalized * (BoidConfig.CollisionAvoidancePriority / RightHit.distance);
+                velocity = bestDir.normalized * BoidConfig.CollisionAvoidancePriority;
                 return;
             }
             Debug.DrawRay(transform.position, leftSensorDir.normalized * BoidConfig.maxRayDistance, Color.white);
