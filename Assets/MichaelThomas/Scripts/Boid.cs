@@ -62,141 +62,49 @@ public class Boid : MonoBehaviour
     { //If the leader gets killed as a boid hits a collision skip till a new leader is selected
         if (Leader != null)
         {
-            Vector3 leftSensorDir = Quaternion.Euler(90, 180, 0) * new Vector3(1, 1, 0) + velocity;
-            Vector3 RightSensorDir = Quaternion.Euler(180, 20, 0) * new Vector3(1, 1, 0) + velocity;
-            leftSensorDir.z = 0;
-            RightSensorDir.z = 0;
+            Vector3 leftSensorDir = Vector3.Lerp(transform.right, transform.up, 0.25f).normalized;
+            Vector3 RightSensorDir = Vector3.Lerp(transform.right, -transform.up, 0.25f).normalized;
+            Vector3 forwardSensorDir = transform.right;
+
             //Left, centre and right raycasts 
-            RaycastHit2D centreHit = Physics2D.Raycast(transform.position, velocity, BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
+            RaycastHit2D centreHit = Physics2D.Raycast(transform.position, forwardSensorDir, BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
             RaycastHit2D LeftHit = Physics2D.Raycast(transform.position, leftSensorDir, BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
             RaycastHit2D RightHit = Physics2D.Raycast(transform.position, RightSensorDir, BoidConfig.maxRayDistance, World.enemyAttackLayerMask);
             Vector3 newDir = Vector3.zero;
             Vector3 bestDir = Vector3.zero;
-            float ClosestDistance = 1000.0f;
             int iterationCount = 10;
-            float angleMin = 180 / iterationCount;
 
             if (centreHit.collider)
             {
                 Vector2 LeaderPosOnCollision = Leader.transform.position;
-                
+
+                bool priortiseLeft = LeftHit.collider != null;
+
+                if (LeftHit.collider != null && RightHit.collider != null)
+                {
+                    priortiseLeft = Vector3.Distance(LeftHit.point, transform.position) < Vector3.Distance(RightHit.point, transform.position);
+                }
+
                 for (int i = 1; i <= iterationCount; i++)
                 {
-                    for (int d = -1; d < 2; d += 2)
+                    newDir = Vector3.Lerp(forwardSensorDir, Vector3.Lerp(-transform.right, (priortiseLeft ? RightSensorDir : leftSensorDir), 0.1f).normalized, (float)i / iterationCount).normalized;
+                    //If the new direction isn't hiting a wall make this the best direction
+                    if (!Physics2D.Raycast(transform.position, newDir, BoidConfig.maxRayDistance * 2.0f, World.enemyAttackLayerMask))
                     {
-                        //makes new direction with degree of rotation
-                        if (0 > d)
-                            newDir = (Quaternion.Euler(0, angleMin * i * d, 0) * velocity);
-                        else
-                            newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * velocity);
-
-                        newDir.z = 0;
-                        //Check if the newDir distance to leader is less than the current bestDir
-                        if (Vector2.Distance(transform.position + newDir, LeaderPosOnCollision) >= ClosestDistance)
-                            continue;
-                        //If the new direction isn't hiting a wall make this the best direction
-                        if (!Physics2D.Raycast(transform.position, newDir, BoidConfig.maxRayDistance, World.enemyAttackLayerMask))
-                        {
-                            ClosestDistance = Vector2.Distance(transform.position + newDir, LeaderPosOnCollision);
-                            bestDir = newDir;
-                            continue;
-                        }
-                        Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.red);
+                        Debug.DrawRay(transform.position, newDir * BoidConfig.maxRayDistance, Color.cyan);
+                        bestDir = newDir;
+                        break;
                     }
                 }
-                //If the boid is touching the target 
-                if (centreHit.distance == 0)
-                {
-                    Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                    velocity = newDir.normalized * BoidConfig.CollisionAvoidancePriority;
-                    return;
-                }
-                Debug.DrawRay(transform.position, bestDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                velocity = bestDir.normalized * BoidConfig.CollisionAvoidancePriority;
-                return;
 
-            }
-            else if (LeftHit.collider)
-            {
-                Vector2 LeaderPosOnCollision = Leader.transform.position;
-                for (int i = 1; i <= iterationCount; i++)
-                {
-                    for (int d = -1; d < 2; d += 2)
-                    {
-                        //makes new direction with degree of rotation
-                        if (0 > d)
-                            newDir = (Quaternion.Euler(0, angleMin * i * d, 0) * leftSensorDir);
-                        else
-                            newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * leftSensorDir);
-
-                        newDir.z = 0;
-                        //Check if the newDir distance to leader is less than the current bestDir
-                        if (Vector2.Distance(transform.position + newDir, LeaderPosOnCollision) >= ClosestDistance)
-                            continue;
-
-                        //If the new direction isn't hiting a wall make this the best direction
-                        if (!Physics2D.Raycast(transform.position, newDir, BoidConfig.maxRayDistance, World.enemyAttackLayerMask))
-                        {
-                            ClosestDistance = Vector2.Distance(transform.position + newDir, LeaderPosOnCollision);
-                            bestDir = newDir;
-                            continue;
-                        }
-                        Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.red);
-                    }
-                }
-                //If the boid is touching the target 
-                if (LeftHit.distance == 0)
-                {
-                    Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                    velocity = newDir.normalized * BoidConfig.CollisionAvoidancePriority;
-                    return;
-                }
-
-                Debug.DrawRay(transform.position, bestDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                velocity = bestDir.normalized * BoidConfig.CollisionAvoidancePriority;
+                Debug.DrawRay(transform.position, bestDir * BoidConfig.maxRayDistance, Color.green);
+                velocity += bestDir;
                 return;
             }
-            else if (RightHit.collider)
-            {
-                Vector2 LeaderPosOnCollision = Leader.transform.position;
-                for (int i = 1; i <= iterationCount; i++)
-                {
-                    for (int d = -1; d < 2; d += 2)
-                    {
-                        //makes new direction with degree of rotation
-                        if (0 > d)
-                            newDir = (Quaternion.Euler(0, angleMin * i * d, 0) * leftSensorDir);
-                        else
-                            newDir = (Quaternion.Euler(angleMin * i * d, 0, 0) * leftSensorDir);
 
-                        newDir.z = 0;
-                        //Check if the newDir distance to leader is less than the current bestDir
-                        if (Vector2.Distance(transform.position + newDir, LeaderPosOnCollision) >= ClosestDistance)
-                            continue;
-
-                        //If the new direction isn't hiting a wall make this the best direction
-                        if (!Physics2D.Raycast(transform.position, newDir, BoidConfig.maxRayDistance, World.enemyAttackLayerMask))
-                        {
-                            ClosestDistance = Vector2.Distance(transform.position + newDir, LeaderPosOnCollision);
-                            bestDir = newDir;
-                            continue;
-                        }
-                        Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.red);
-                    }
-                }
-                //If the boid is touching the target 
-                if (RightHit.distance == 0)
-                {
-                    Debug.DrawRay(transform.position, newDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                    velocity = newDir.normalized * BoidConfig.CollisionAvoidancePriority;
-                }
-                Debug.DrawRay(transform.position, bestDir.normalized * BoidConfig.maxRayDistance, Color.green);
-                velocity = bestDir.normalized * BoidConfig.CollisionAvoidancePriority;
-                return;
-            }
-            Debug.DrawRay(transform.position, leftSensorDir.normalized * BoidConfig.maxRayDistance, Color.white);
-            Debug.DrawRay(transform.position, RightSensorDir.normalized * BoidConfig.maxRayDistance, Color.white);
-            Debug.DrawRay(transform.position, velocity.normalized * BoidConfig.maxRayDistance, Color.white);
+            Debug.DrawRay(transform.position, leftSensorDir * BoidConfig.maxRayDistance, Color.white);
+            Debug.DrawRay(transform.position, RightSensorDir * BoidConfig.maxRayDistance, Color.white);
+            Debug.DrawRay(transform.position, forwardSensorDir * BoidConfig.maxRayDistance, Color.white);
         }
     }
 
@@ -346,7 +254,7 @@ public class Boid : MonoBehaviour
 
         foreach (Controller teamController in team)
         {
-            if (teamController == agentController)
+            if (teamController == agentController || teamController.boid == null)
                 continue;
 
             if (Vector3.Distance(transform.position, teamController.transform.position) <= radius)
