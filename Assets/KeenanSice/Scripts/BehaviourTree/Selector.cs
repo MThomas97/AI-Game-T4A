@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 //KS - Selector executes children till one succeeds, if none succeed the selector fails.
 public class Selector : Composite
@@ -19,7 +17,6 @@ public class Selector : Composite
     {
         if (currentChild.Current == null)
         {
-            Debug.Log("Selector has no children. Can't do.");
             //KS - We could technically return a success and continue as normal, but why waste performance. This will flag the issue.
             return Status.Failure;
         }

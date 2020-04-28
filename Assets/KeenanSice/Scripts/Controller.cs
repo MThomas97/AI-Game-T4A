@@ -80,6 +80,11 @@ public class Controller : MonoBehaviour
 
     protected void Update()
     {
+        UpdateLaserLine();
+    }
+
+    void UpdateLaserLine()
+    {
         if (attackSpeedTimer > 0.0f)
         {
             attackSpeedTimer -= Time.deltaTime;
@@ -88,8 +93,8 @@ public class Controller : MonoBehaviour
         if (laserLineResetTimer > 0.0f)
         {
             laserLineResetTimer -= Time.deltaTime;
-            
-            if(laserLineResetTimer < 0.0f)
+
+            if (laserLineResetTimer < 0.0f)
             {
                 lr.positionCount = 0;
             }

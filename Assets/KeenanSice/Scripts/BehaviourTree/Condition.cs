@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using System;
 
+//KS - Condition will execute a method to determine whether it should perform the success or failure behavior.
 public class Condition : Behaviour
 {
     protected Func<bool> conditionMethod = new Func<bool>(() => false);

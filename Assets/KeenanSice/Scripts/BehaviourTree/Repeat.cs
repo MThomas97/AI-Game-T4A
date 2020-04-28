@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿//KS - Repeat executes the child N number of times, specified by the counter limit.
 public class Repeat : Decorator
 {
     public Repeat(Behaviour newChild, int newCounterLimit) : base(newChild) => counterLimit = newCounterLimit;
@@ -11,6 +8,8 @@ public class Repeat : Decorator
 
     public override Status Update(ref string outDebug, int branchDepth)
     {
+        counter = 0;
+
         while (true)
         {
             child.Tick(ref outDebug, branchDepth);
@@ -26,7 +25,7 @@ public class Repeat : Decorator
             }
 
             if (++counter == counterLimit)
-            {
+            {           
                 return Status.Success;
             }
         }

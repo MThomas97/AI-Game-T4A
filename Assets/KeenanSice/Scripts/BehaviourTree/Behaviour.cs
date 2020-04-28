@@ -1,11 +1,7 @@
-﻿//#define KSDEBUG
-
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Behaviour
+﻿public class Behaviour
 {
+    private Status status = Status.Invalid;
+
     public virtual void Init()
     {
     }
@@ -44,13 +40,10 @@ public class Behaviour
         return Status.Invalid;
     }
 
-
     public Status GetStatus()
     {
         return status;
     }
-
-    private Status status = Status.Invalid;
 
     public bool IsTerminated()
     {
@@ -67,8 +60,6 @@ public class Behaviour
         Terminate(Status.Aborted);
         status = Status.Aborted;
     }
-
-
 }
 
 public enum Status

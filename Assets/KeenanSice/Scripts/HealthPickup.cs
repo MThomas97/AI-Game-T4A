@@ -11,7 +11,6 @@ public class HealthPickup : BasePickup
             instigator.SetHealth(instigator.healthMax);
             return true;
         }
-
         return false;
     }
 }

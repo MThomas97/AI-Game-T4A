@@ -8,13 +8,13 @@ using UnityEngine;
 public class PlayerController : Controller
 {
     Rigidbody2D rb = null;
-
     float axisMovementDeadzone = 0.01f;
 
     protected new void Start()
     {
         base.Start();
 
+        //KS - Setup Rigidbody
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0;
         rb.freezeRotation = true;
@@ -23,7 +23,6 @@ public class PlayerController : Controller
     protected new void Update()
     {
         base.Update();
-
         HandleInput();
     }
 
@@ -32,14 +31,15 @@ public class PlayerController : Controller
         HandleFixedUpdateInput();
     }
 
+    //KS - Handle inputs that do not require physics updates.
     void HandleInput()
     {
         if (Input.GetButtonDown("Fire_" + teamNumber))
         {
-            Debug.Log(Time.fixedTime);
-
+            //KS - If we cannot pick something up attempt to shoot.
             if (!TryPickup())
             {
+                //KS - If we have ammo, try attacking.
                 if (HasAmmo())
                 {
                     TryAttack();
@@ -48,17 +48,20 @@ public class PlayerController : Controller
         }
     }
 
+    //KS - Handle inputs that require physics updates.
     void HandleFixedUpdateInput()
     {
         float horizontalAxis = Input.GetAxis("Horizontal_" + teamNumber);
         float verticalAxis = Input.GetAxis("Vertical_" + teamNumber);
 
+        //KS - If either axis is larger than the deadzone threshold, we will move the agent.
         if (Mathf.Abs(horizontalAxis) > axisMovementDeadzone || Mathf.Abs(verticalAxis) > axisMovementDeadzone)
         {
             Move(new Vector2(horizontalAxis, verticalAxis));
         }
     }
 
+    //KS - Handle agent movement, and rotate towards the directly were heading.
     void Move(Vector2 movement)
     {
         Vector2 targetPosition = new Vector2(transform.position.x, transform.position.y) + movement * movementSpeed * Time.deltaTime;
@@ -70,6 +73,7 @@ public class PlayerController : Controller
         transform.rotation = Quaternion.RotateTowards(transform.rotation, quart, Time.deltaTime * rotationSpeed);
     }
 
+    //KS - Try and find a target instead our attack cone, this is a simple form of aim assist. If a target is found we will attack them.
     bool TryAttack()
     {
         Controller attackee = null;
@@ -95,7 +99,6 @@ public class PlayerController : Controller
 
         return Attack(attackee);
     }
-
 
     bool TryPickup()
     {

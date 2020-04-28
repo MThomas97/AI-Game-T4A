@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
+//KS - Action is used to perform the given method. Note: It's called a KSAction as I ran into a conflict with the C# type Action.
 public class KSAction : Behaviour
 {
     protected Func<bool> actionMethod;

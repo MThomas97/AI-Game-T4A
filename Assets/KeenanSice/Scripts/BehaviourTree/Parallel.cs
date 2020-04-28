@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//KS - Parallel is conceptually used for concurrent behaviours despite being single threaded, it ticks all the children and returns out depending on the given policies.
 public class Parallel : Composite
 {
     protected Policy successPolicy, failurePolicy;

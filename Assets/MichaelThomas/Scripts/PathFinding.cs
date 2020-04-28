@@ -25,7 +25,7 @@ public static class PathFinding
         {	
             for (int y = -1; y < 2; y++)
             {
-				if (!World.IsPositionWalkable(new Vector2Int(x + currentNode.pos.x, y + currentNode.pos.y)))
+				if (!IsPositionWalkable(new Vector2Int(x + currentNode.pos.x, y + currentNode.pos.y)))
 					continue;
 				if (x == 0 && y == 0)
 					continue;
@@ -40,14 +40,14 @@ public static class PathFinding
 					{
 						if (v == 0) continue;
 
-						if (!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(0, v))) adjacentWall = true;
+						if (!IsPositionWalkable(newNeighbour.pos + new Vector2Int(0, v))) adjacentWall = true;
 					}
 
 					for (int h = -1; h < 2; h++)
 					{
 						if (h == 0) continue;
 
-						if (!World.IsPositionWalkable(newNeighbour.pos + new Vector2Int(h, 0))) adjacentWall = true;
+						if (!IsPositionWalkable(newNeighbour.pos + new Vector2Int(h, 0))) adjacentWall = true;
 					}
 
 					if (!adjacentWall) neighbours.Add(newNeighbour);
@@ -98,7 +98,7 @@ public static class PathFinding
 		sw.Start();
 
 		//Firstly checks if the target and start position are not walkable then its out of bounds
-		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
+		if (!IsPositionWalkable(targetPos) || !IsPositionWalkable(startPos))
 		{
             output += ("Target is out of bounds.\n");
 			return null;
@@ -175,7 +175,7 @@ public static class PathFinding
         Stopwatch sw = new Stopwatch();
 		sw.Start();
 
-		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
+		if (!IsPositionWalkable(targetPos) || !IsPositionWalkable(startPos))
 		{
             output += "Target is out of bounds.\n";
 			return null;
@@ -286,4 +286,17 @@ public static class PathFinding
 		}
 		return path;
 	}
+
+    static bool IsPositionWalkable(Vector2Int position)
+    {
+        WorldTile tile;
+
+        //KS - Dictionary look up for valid position.
+        if (World.worldTiles.TryGetValue(position, out tile))
+        {
+            return (tile is WalkableTile);
+        }
+
+        return false;
+    }
 }

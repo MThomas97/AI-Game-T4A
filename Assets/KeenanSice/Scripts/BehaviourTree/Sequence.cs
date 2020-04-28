@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 //KS - Sequence executes children till one fails, if none fail the sequence succeeds.
 public class Sequence : Composite
@@ -19,7 +17,6 @@ public class Sequence : Composite
     {
         if (currentChild.Current == null)
         {
-            Debug.Log("Sequence has no children. Can't do.");
             //KS - We could technically return a success and continue as normal, but why waste performance. This will flag the issue.
             return Status.Failure;
         }
