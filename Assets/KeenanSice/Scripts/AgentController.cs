@@ -368,7 +368,7 @@ public class AgentController : Controller
             float heightOffset = labelHeight * teamNumber;
             GUI.contentColor = World.playerColours[teamNumber];
 
-            GUI.skin.label.fontSize = 30;
+            GUI.skin.label.fontSize = Screen.width / 100;
             GUI.skin.label.alignment = TextAnchor.UpperRight;
             GUI.Label(new Rect(Screen.width * 0.5f, heightOffset, (Screen.width * 0.5f) - widthPadding, labelHeight), pathfindingDebugOutput);
         }

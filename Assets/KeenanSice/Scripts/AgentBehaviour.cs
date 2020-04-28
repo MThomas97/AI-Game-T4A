@@ -72,7 +72,7 @@ public class AgentBehaviour : MonoBehaviour
         float heightOffset = labelHeight * ac.teamNumber;
         GUI.contentColor = World.playerColours[ac.teamNumber];
 
-        GUI.skin.label.fontSize = 15;
+        GUI.skin.label.fontSize = Screen.width / 100;
         GUI.skin.label.alignment = TextAnchor.UpperLeft;
         GUI.Label(new Rect(widthPadding, heightOffset, Screen.width * 0.5f, labelHeight), btDebugOutput);
     }
