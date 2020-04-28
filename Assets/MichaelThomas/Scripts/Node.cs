@@ -17,7 +17,7 @@ public class Node : IHeapItem<Node>
 		pos = position;
 	}
 
-	public int fCost {
+	public int fCost { //Total cost of gCost and hCost
 		get {
 			return gCost + hCost;
 		}
@@ -40,9 +40,9 @@ public class Node : IHeapItem<Node>
         return new Vector3(pos.x, pos.y);
     }
 
-
+	
 	public int CompareTo(Node nodeToCompare)
-	{
+	{//Compare the fCost between two nodes with fCost and gCost
 		int compare = fCost.CompareTo(nodeToCompare.fCost);
 
 		if(compare == 0)

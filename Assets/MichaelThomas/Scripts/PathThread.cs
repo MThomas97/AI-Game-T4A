@@ -14,6 +14,7 @@ public class PathThread
 
     public string output;
 
+    //Sets the start pos and end pos and string
     public PathThread(Vector2Int posStart, Vector2Int posEnd, string stringOutput)
     {
         startPos = posStart;

@@ -7,6 +7,7 @@ using System.Threading;
 
 public static class PathFinding
 {
+	//Costs for moving straight and diagonal
     private static int MOVE_STRIAGHT_COST = 10;
     private static int MOVE_DIAGONAL_COST = 20;
 
@@ -15,6 +16,7 @@ public static class PathFinding
 
 	private static volatile bool isDone = false;
 
+	//Gets all the neighbouring nodes that are walkable from the current node
 	private static List<Node> GetNeighbours(Node currentNode)
     {
 		List<Node> neighbours = new List<Node>();
@@ -77,6 +79,7 @@ public static class PathFinding
 			return false;
 	}
 
+	//Takes in two vector3 positions to calulate path
     public static Node CalculatePath(Vector3 startPos, Vector3 targetPos, out string output)
     {
 		return CalculatePath(new Vector2Int(Mathf.RoundToInt(startPos.x), Mathf.RoundToInt(startPos.y)), new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y)), out output);
@@ -94,6 +97,7 @@ public static class PathFinding
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
 
+		//Firstly checks if the target and start position are not walkable then its out of bounds
 		if (!World.IsPositionWalkable(targetPos) || !World.IsPositionWalkable(startPos))
 		{
             output += ("Target is out of bounds.\n");
@@ -136,14 +140,16 @@ public static class PathFinding
 				return RetracePath(startNode, currentNode);
 			}
 
+			//Checks all the neighbours nodes
 			foreach (Node neighbour in GetNeighbours(currentNode)) 
-			{
+			{ //If the node has already been visited skip that node
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
 				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
 				
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
-				if (newMovementCostToNeighbour < neighbour.gCost || !OPEN.ContainsKey(neighbour.pos)) 
+				//Checks if the newMovementCostToNeighbour gCost is less than the neighbour gCost and isn't in OPEN list
+				if (newMovementCostToNeighbour < neighbour.gCost && !OPEN.ContainsKey(neighbour.pos)) 
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
 					neighbour.hCost = GetDistance(neighbour.pos, targetNode.pos);
@@ -192,6 +198,7 @@ public static class PathFinding
 			if(!CLOSED.ContainsKey(currentNode.pos))
 				CLOSED.Add(currentNode.pos, currentNode);
 
+			//Once the current node = the target node retrace path and display stats
 			if (currentNode.pos == targetNode.pos)
 			{
 				sw.Stop();
@@ -203,13 +210,15 @@ public static class PathFinding
                 return RetracePath(startNode, currentNode);
 			}
 
+			//Checks all the neighbours nodes
 			foreach (Node neighbour in GetNeighbours(currentNode))
-			{
+			{ //If the node has already been visited skip that node
 				if (CLOSED.ContainsKey(neighbour.pos))
 					continue;
 				neighbour.gCost = GetDistance(neighbour.pos, startNode.pos);
 	
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode.pos, neighbour.pos);
+				//Checks if the newMovementCostToNeighbour gCost is less than the neighbour gCost and isn't in OPEN list
 				if (newMovementCostToNeighbour < neighbour.gCost || !Operations.ContainsKey(neighbour.pos))
 				{
 					neighbour.gCost = newMovementCostToNeighbour;
@@ -230,37 +239,44 @@ public static class PathFinding
 
 
 	static Node RetracePath(Node startNode, Node targetNode)
-	{
+	{ //This function retraces the path back to the start position
         List<Node> path = new List<Node>();
         Node previousNode = null;
 		Node currentNode = targetNode;
 		int distance = currentNode.gCost;
 
+		//Loops through and traces node back to start position
 		while(currentNode != startNode)
 		{
 			Vector3 pos = new Vector3(currentNode.pos.x, currentNode.pos.y, 0);
 
+			//Set the nextNode of currentNode parent
             Node nextNode = currentNode.parent;
+			//Sets the parent of the targetNode to null since you've reached the desination
             currentNode.parent = previousNode;
+			//Saves the current node before it gets set to its parent
             previousNode = currentNode;
+			//Sets the current node to its parent so it retraces back to the start node
             currentNode = nextNode;
 		}
 
         currentNode.parent = previousNode;
 		currentNode.distance = distance;
-        return SimplifyPath(currentNode);
+        return SimplifyPath(currentNode); //current node will have a parent and that node will have a parent that will eventually lead to the targetNode all in one node
 	}
 
 	static Node SimplifyPath(Node path)
-	{
+	{ //Simplifies the path by finding what nodes are all in a straight line
         Node currentNode = path;
-
+		 //Checks the node if its null and checks its future nodes if they're null too
 		while (currentNode != null && currentNode.parent != null && currentNode.parent.parent != null)
 		{
+			//Looks at the parent and the parent of parent to see if the direction in x&y have changed
             Node nextNode = currentNode.parent;
             Node nextNode2 = currentNode.parent.parent;
 			Vector3 directionCurrentToNext = Vector3.Normalize(new Vector3(currentNode.pos.x - nextNode.pos.x, currentNode.pos.y - nextNode.pos.y, 0));
             Vector3 directionNext = Vector3.Normalize(new Vector3(nextNode.pos.x - nextNode2.pos.x, nextNode.pos.y - nextNode2.pos.y, 0));
+			//If both directions are the same then set the parent to the nextNode2 since the pathfinding is going in the same direction
 			if (directionCurrentToNext == directionNext)
 			{
                 currentNode.parent = nextNode2;

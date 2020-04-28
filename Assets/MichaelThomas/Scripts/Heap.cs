@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 
 public class Heap<T> where T : IHeapItem<T>
-{
+{ //Heap data structure to make path finding faster with finding, sorting and removing nodes
     T[] items;
 
     int currentItemCount;
