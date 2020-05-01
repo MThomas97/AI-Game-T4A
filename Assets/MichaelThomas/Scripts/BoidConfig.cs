@@ -7,7 +7,7 @@ public static class BoidConfig
     //Boid Variables
     static public float maxFOV = 180;
     static public float maxMovementSpeed = 1.3f;
-    static public float rotationSpeed = 180;
+    static public float rotationSpeed = 360;
 
     //Seperation Variables
     static public float separationRadius = 1.5f;

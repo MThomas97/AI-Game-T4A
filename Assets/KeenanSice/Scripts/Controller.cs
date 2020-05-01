@@ -46,6 +46,7 @@ public class Controller : MonoBehaviour
         lr.widthMultiplier = 0.25f;
         lr.material = new Material(Shader.Find("Unlit/Color"));
         lr.material.color = World.playerColours[teamNumber];
+
         SetHealth(healthMax);
         ammo = ammoMax;
     }
@@ -155,5 +156,11 @@ public class Controller : MonoBehaviour
     {
         ammo = Mathf.Min(newAmmo, ammoMax);
         ammobar.localScale = new Vector3(ammobar.localScale.x, ammo / (float)ammoMax, ammobar.localScale.z);
+    }
+
+    public void SetOpacity(int amount)
+    {
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, amount);
     }
 }

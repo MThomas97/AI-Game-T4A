@@ -26,25 +26,20 @@ public class AgentBehaviour : MonoBehaviour
                 ),
                 condition(ac.HasTarget,
                     //KS - HasTarget = true
-                    condition(ac.IsTargetInRange,
-                        //KS - IsTargetInRange = true
-                        condition(ac.IsFacingTarget,
-                            //KS - IsFacingTarget = true
+                    condition(ac.IsFacingTarget,
+                        //KS - IsFacingTarget = true
+                        condition(ac.IsTargetInRange,
+                            //KS - IsTargetInRange = true
                             selector(
                                 action(ac.AttackAgent),
                                 action(ac.PickupCollectable),
                                 action(ac.PatrolToNextTarget)
                             ),
-                            //KS - IsFacingTarget = false
-                            action(ac.RotateTowards)
+                            //KS - IsTargetInRange = false
+                            action(ac.MoveForward)
                         ),
-                        //KS - IsTargetInRange = false
-                        condition(ac.IsFacingTarget,
-                            //KS - IsFacingTarget = true
-                            action(ac.MoveForward),
-                            //KS - IsFacingTarget = false
-                            action(ac.RotateTowards)
-                        )
+                        //KS - IsFacingTarget = false
+                        action(ac.RotateTowards)
                     ),
                     //KS - HasTarget = false
                     action() //KS - Do Nothing

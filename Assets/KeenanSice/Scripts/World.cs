@@ -87,6 +87,8 @@ public class World : MonoBehaviour
 {
     public static Color[] playerColours = { Color.red, Color.green, Color.blue, Color.magenta, Color.yellow, Color.cyan };
 
+    public static float flockingOpacity = 0.5f;
+
     public static Dictionary<Vector2Int, WorldTile> worldTiles = new Dictionary<Vector2Int, WorldTile>();
 
     public static Vector2Int worldTileDimensions = Vector2Int.zero;
@@ -167,7 +169,7 @@ public class World : MonoBehaviour
                     //KS - [End] Spawn prefab agent at position facing the center of the map.
 
                     //KS - Change agent colour to match team colour.
-                    agent.GetComponent<SpriteRenderer>().color = playerColours[i];
+                    agent.GetComponent<SpriteRenderer>().color = playerColours[i] * new Color(1, 1, 1, flockingOpacity);
 
                     bool isLeaderOfTeam = x == 0;
 
@@ -216,6 +218,7 @@ public class World : MonoBehaviour
             if (!(leader is PlayerController) && !agentTeams[teamNumber][0].GetComponent<AgentBehaviour>())
             {
                 agentTeams[teamNumber][0].gameObject.AddComponent<AgentBehaviour>();
+                agentTeams[teamNumber][0].gameObject.GetComponent<Controller>().SetOpacity(255);
             }
         }
     }

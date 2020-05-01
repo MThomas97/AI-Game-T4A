@@ -326,7 +326,6 @@ public class AgentController : Controller
     {
         if (!patrolling)
         {
-            Debug.Log(teamNumber + " PATROLLING " + Time.fixedTime);
             SetTargetToRandomSpawn();
         }
 
