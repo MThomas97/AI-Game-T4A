@@ -98,7 +98,7 @@ public class Boid : MonoBehaviour
                 }
 
                 Debug.DrawRay(transform.position, bestDir * BoidConfig.maxRayDistance, Color.green);
-                velocity += bestDir;
+                velocity += bestDir * 2.5f;
                 return;
             }
 

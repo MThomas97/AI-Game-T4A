@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class WorldTile 
 {
@@ -112,10 +113,15 @@ public class World : MonoBehaviour
     public static List<List<Controller>> agentTeams = new List<List<Controller>>();
 
     public int totalHumanPlayers = 1;
-    public int totalAgentsOnATeam = 1;
+    public int totalAgentsOnATeam = 3;
 
     //KS - Raycasts should only hit walls.
     public const int enemyAttackLayerMask = ~(1 << 10);
+
+    private static int winningTeamNumber = -1;
+    private const float gameOverRestartTimerMax = 5.0f;
+    private float gameOverRestartTimer = gameOverRestartTimerMax;
+
 
     public static int AgentCount
     {
@@ -349,5 +355,67 @@ public class World : MonoBehaviour
 
         newTile.Initialise();
         worldTiles.Add(new Vector2Int(x, y), newTile);
+    }
+
+
+    public static void CheckWinState()
+    {
+        int teamAliveCount = 0;
+        int winningTeam = -1;
+
+        foreach (List<Controller> team in agentTeams)
+        {
+            if(team.Count > 0)
+            {
+                teamAliveCount++;
+                winningTeam = team[0].teamNumber;
+            }
+        }
+
+        if(teamAliveCount <= 1)
+        {
+            winningTeamNumber = winningTeam;
+        }
+    }
+
+    private void Update()
+    {
+        if (winningTeamNumber > -1)
+        {
+            if ((gameOverRestartTimer -= Time.deltaTime) < 0.0f)
+            {
+                RestartGame();
+            }
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (winningTeamNumber > -1)
+        {
+            GUI.skin.box.fontSize = Screen.width / 20;
+            GUI.skin.box.alignment = TextAnchor.MiddleCenter;
+            GUI.contentColor = playerColours[winningTeamNumber];
+            GUI.Box(new Rect(Vector2.zero, new Vector2(Screen.width, Screen.height)), "WINNER!\nRestarting in " + (int)gameOverRestartTimer + " seconds.");
+        }
+    }
+
+    void RestartGame()
+    {
+        gameOverRestartTimer = gameOverRestartTimerMax;
+        winningTeamNumber = -1;
+
+        foreach (List<Controller> team in agentTeams)
+        {
+            foreach (Controller agent in team)
+            {
+                Destroy(agent.gameObject);
+            }
+
+            team.Clear();
+        }
+
+        agentTeams.Clear();
+        SetupAgents();
     }
 }

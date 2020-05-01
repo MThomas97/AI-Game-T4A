@@ -70,6 +70,7 @@ public class Controller : MonoBehaviour
         if (health <= 0)
         {
             World.RemoveControllerFromTeam(this);
+            World.CheckWinState();
             Destroy(transform.gameObject);
         }
     }
