@@ -21,13 +21,11 @@ public class Condition : Behaviour
 
         if (conditionMethod())
         {
-            successBehaviour.Tick(ref outDebug, branchDepth);
+            return successBehaviour.Tick(ref outDebug, branchDepth);
         }
         else
         {
-            failureBehaviour.Tick(ref outDebug, branchDepth);
+            return failureBehaviour.Tick(ref outDebug, branchDepth);
         }
-
-        return Status.Success;
     }
 }

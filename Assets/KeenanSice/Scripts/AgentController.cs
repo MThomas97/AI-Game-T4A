@@ -108,7 +108,11 @@ public class AgentController : Controller
             }
         }
 
-        SetTarget(target);
+        if (target)
+        {
+            SetTarget(target);
+        }
+
         return target != null;
     }
 
@@ -149,7 +153,11 @@ public class AgentController : Controller
             }
         }
 
-        SetTarget(target);
+        if (target)
+        {
+            SetTarget(target);
+        }
+
         return target != null;
     }
 
@@ -316,7 +324,11 @@ public class AgentController : Controller
 
     public bool StartPatrol()
     {
-        if (!patrolling) SetTargetToRandomSpawn();
+        if (!patrolling)
+        {
+            Debug.Log(teamNumber + " PATROLLING " + Time.fixedTime);
+            SetTargetToRandomSpawn();
+        }
 
         return patrolling;
 

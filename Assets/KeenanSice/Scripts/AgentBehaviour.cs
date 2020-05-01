@@ -14,9 +14,13 @@ public class AgentBehaviour : MonoBehaviour
             sequence(
                 action(ac.CheckResetTargetTimer),
                 selector(
-                    action(ac.SetTargetToClosestActiveAmmo),
-                    action(ac.SetTargetToEnemyInSight),
-                    action(ac.SetTargetToLastEnemySeen),
+                    condition(ac.HasAmmo,
+                        selector(
+                        action(ac.SetTargetToEnemyInSight),
+                        action(ac.SetTargetToLastEnemySeen)
+                        ),
+                        action(ac.SetTargetToClosestActiveAmmo)
+                    ),
                     action(ac.SetTargetToClosestActiveHealth),
                     action(ac.StartPatrol)
                 ),
