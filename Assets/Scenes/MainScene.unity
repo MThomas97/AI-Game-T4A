@@ -240,7 +240,7 @@ MonoBehaviour:
     type: 3}
   baseAgentObject: {fileID: 4616702162236567698, guid: 798acd07ff8f00a4ea2833458422185a,
     type: 3}
-  totalHumanPlayers: 1
+  totalHumanPlayers: 0
   totalAgentsOnATeam: 3
 --- !u!4 &1340747216
 Transform:
